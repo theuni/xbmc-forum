@@ -1,0 +1,17 @@
+<tr class="{$bgcolor}">
+	<td class="{$thread_type_class} col-status"><img src="{$theme['imgdir']}/{$folder}.gif" alt="{$folder_label}" title="{$folder_label}" /></td>
+	<td class="{$thread_type_class} col-icon">{$icon}</td>
+	<td class="{$thread_type_class} col-subject">
+		{$attachment_count}
+		<strong>{$prefix} {$gotounread}{$thread['threadprefix']}<a href="{$thread['threadlink']}" class="{$inline_edit_class} {$new_class}" id="tid_{$inline_edit_tid}">{$thread['subject']}</a></strong> {$thread['multipage']}
+		<div class="author">{$thread['profilelink']}</div>
+	</td>
+	<td class="{$thread_type_class} col-posts"><a href="javascript:MyBB.whoPosted({$thread['tid']});">{$thread['replies']}</a>{$unapproved_posts}</td>
+	<td class="{$thread_type_class} col-views">{$thread['views']}</td>
+	{$rating}
+	<td class="{$thread_type_class} col-lastpost">
+		<span class="lastpost smalltext">{$lastpostdate} {$lastposttime}<br />
+		<a href="{$thread['lastpostlink']}">{$lang->lastpost}</a>: {$lastposterlink}</span>
+	</td>
+{$modbit}
+</tr>

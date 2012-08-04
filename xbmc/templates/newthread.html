@@ -1,0 +1,57 @@
+<html>
+<head>
+<title>{$lang->newthread_in}</title>
+{$headerinclude}
+<script type="text/javascript" src="jscripts/post.js?ver=1400"></script>
+</head>
+<body>
+{$header}
+{$preview}
+{$thread_errors}
+{$attacherror}
+<form action="newthread.php?fid={$fid}&amp;processed=1" method="post" enctype="multipart/form-data" name="input">
+<input type="hidden" name="my_post_key" value="{$mybb->post_code}" />
+<table class="tborder">
+<tr>
+<td class="thead" colspan="2"><strong>{$lang->post_new_thread}</strong></td>
+</tr>
+{$loginbox}
+<tr>
+<td class="trow2" width="20%"><strong>{$lang->thread_subject}</strong></td>
+<td class="trow2">{$prefixselect}<input type="text" class="textbox" name="subject" size="40" maxlength="85" value="{$subject}" tabindex="1" /></td>
+</tr>
+{$posticons}
+<tr>
+<td class="trow2" valign="top"><strong>{$lang->your_message}</strong>{$smilieinserter}</td>
+<td class="trow2">
+<textarea name="message" id="message" rows="20" cols="70" tabindex="2">{$message}</textarea>
+{$codebuttons}
+{$multiquote_external}
+</td>
+</tr>
+<tr>
+<td class="trow1" valign="top"><strong>{$lang->post_options}</strong></td>
+<td class="trow1"><span class="smalltext">
+<label><input type="checkbox" class="checkbox" name="postoptions[signature]" value="1" tabindex="7"{$postoptionschecked['signature']} /> {$lang->options_sig}</label>
+{$disablesmilies}</span></td>
+</tr>
+{$modoptions}
+{$subscriptionmethod}
+{$pollbox}
+{$captcha}
+</table>
+{$attachbox}
+<br />
+<div style="text-align:center"><input type="submit" class="button" name="submit" value="{$lang->post_thread}" tabindex="4" accesskey="s" />  <input type="submit" class="button" name="previewpost" value="{$lang->preview_post}" tabindex="5" />{$savedraftbutton}</div>
+<input type="hidden" name="action" value="do_newthread" />
+<input type="hidden" name="posthash" value="{$posthash}" />
+<input type="hidden" name="attachmentaid" value="" />
+<input type="hidden" name="attachmentact" value="" />
+<input type="hidden" name="quoted_ids" value="{$quoted_ids}" />
+<input type="hidden" name="tid" value="{$tid}" />
+{$editdraftpid}
+</form>
+{$forumrules}
+{$footer}
+</body>
+</html>

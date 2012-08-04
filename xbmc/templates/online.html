@@ -1,0 +1,28 @@
+<html>
+<head>
+<title>{$mybb->settings['bbname']} - {$lang->users_online}</title>
+{$headerinclude}
+{$refresh}
+</head>
+<body>
+	{$header}
+	{$multipage}
+	<table class="tborder">
+		<tr>
+			<td class="thead" colspan="3"><strong>{$lang->users_online}</strong></td>
+		</tr>
+		<tr>
+			<td class="tcat" align="center"><a href="online.php?sortby=username"><span class="smalltext"><strong>{$lang->on_username}</strong></span></a></td>
+			<td class="tcat" align="center"><a href="online.php?sortby=time"><span class="smalltext"><strong>{$lang->time}</strong></span></a></td>
+			<td class="tcat" width="50%"><a href="online.php?sortby=location"><span class="smalltext"><strong>{$lang->location}</strong></span></a></td>
+		</tr>
+		{$online_rows}
+		<tr>
+			<td class="tfoot" colspan="3" align="right"><span class="smalltext"><strong><a href="online.php?action=today">{$lang->online_today}</a> | <a href="online.php">{$lang->refresh_page}</a></strong></span></td>
+		</tr>
+	</table>
+	<br />
+	{$multipage}
+	{$footer}
+</body>
+</html>

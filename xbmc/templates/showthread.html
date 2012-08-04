@@ -1,0 +1,50 @@
+<html>
+<head>
+<title>{$thread['subject']}</title>
+{$headerinclude}
+<script type="text/javascript">
+<!--
+	var quickdelete_confirm = "{$lang->quickdelete_confirm}";
+// -->
+</script>
+<script type="text/javascript" src="jscripts/thread.js?ver=1603"></script>
+</head>
+<body id="singleThread">
+	{$header}
+	{$pollbox}
+	<div id="sectionHeader">
+		<h1>{$thread['threadprefix']}{$thread['subject']}</h1>
+		{$multipage}
+		<div class="functionBar">
+			{$ratethread} {$newreply}
+		</div>
+	</div>
+	<div id="posts">
+	<div class="threadSearchBox caption">
+		<strong class="threadNavi"><a href="{$next_oldest_link}">&laquo; {$lang->next_oldest}</a> | <a href="{$next_newest_link}">{$lang->next_newest}&raquo; </a></strong>
+		{$search_thread}
+	</div>
+	{$posts}
+	</div>
+	{$quickreply}
+	<div class="functionBar">
+		{$multipage}
+		{$newreply}
+	</div>
+	{$threadexbox}
+	{$similarthreads}
+	<div class="legendBox">
+		<ul class="thread_tools">
+			<li class="printable"><a href="printthread.php?tid={$tid}">{$lang->view_printable}</a></li>
+			<li class="sendthread"><a href="sendthread.php?tid={$tid}">{$lang->send_thread}</a></li>
+			<li class="subscription_{$add_remove_subscription}"><a href="usercp2.php?action={$add_remove_subscription}subscription&amp;tid={$tid}&amp;my_post_key={$mybb->post_code}">{$add_remove_subscription_text}</a></li>
+		</ul>
+	</div>
+	<div class="moderatorFunctions">
+		{$moderationoptions}
+		{$forumjump}
+	</div>
+	{$usersbrowsing}
+	{$footer}
+</body>
+</html>

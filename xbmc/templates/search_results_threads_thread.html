@@ -1,0 +1,21 @@
+<tr>
+	<td align="center" class="{$bgcolor}" width="2%"><img src="{$theme['imgdir']}/{$folder}.gif"  alt="{$folder_label}" title="{$folder_label}" /></td>
+	<td align="center" class="{$bgcolor}" width="2%">{$icon}</td>
+	<td class="{$bgcolor}">
+		{$attachment_count}
+		<div>
+			<span>{$prefix} {$gotounread}{$thread['threadprefix']}<a href="{$thread_link}{$highlight}" class="{$inline_edit_class} {$new_class}" id="tid_{$inline_edit_tid}">{$thread['subject']}</a>{$thread['multipage']}</span>
+			<div class="author smalltext">{$thread['profilelink']}</div>
+		</div>
+	</td>
+	<td class="{$bgcolor}">{$thread['forumlink']}</td>
+	<td align="center" class="{$bgcolor}"><a href="javascript:MyBB.whoPosted({$thread['tid']});">{$thread['replies']}</a></td>
+	<td align="center" class="{$bgcolor}">{$thread['views']}</td>
+	<td class="{$bgcolor}" style="white-space: nowrap">
+		<span class="smalltext">
+			{$lastpostdate} {$lastposttime}<br />
+			<a href="{$thread['lastpostlink']}">{$lang->lastpost}</a>: {$lastposterlink}
+		</span>
+	</td>
+	{$inline_mod_checkbox}
+</tr>

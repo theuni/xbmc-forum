@@ -1,0 +1,17 @@
+<tr>
+	<td align="center" class="{$bgcolor}" width="2%"><img src="{$theme['imgdir']}/{$folder}.gif" alt=""/></td>
+	<td align="center" class="{$bgcolor}" width="2%">{$icon}</td>
+	<td class="{$bgcolor}">
+		<span class="smalltext">
+			{$lang->post_thread} <a href="{$thread_url}{$highlight}">{$post['thread_subject']}</a><br />
+			{$lang->post_subject} <a href="{$post_url}{$highlight}#pid{$post['pid']}">{$post['subject']}</a>
+		</span><br />
+		<table width="100%"><tr><td><span class="smalltext"><em>{$prev}</em></span></td></tr></table>
+	</td>
+	<td align="center" class="{$bgcolor}">{$post['profilelink']}</td>
+	<td class="{$bgcolor}" >{$post['forumlink']}</td>
+	<td align="center" class="{$bgcolor}"><a href="javascript:MyBB.whoPosted({$post['tid']});">{$post['thread_replies']}</a></td>
+	<td align="center" class="{$bgcolor}">{$post['thread_views']}</td>
+	<td class="{$bgcolor}" style="white-space: nowrap; text-align: center;"><span class="smalltext">{$posted}</span></td>
+	{$inline_mod_checkbox}
+</tr>

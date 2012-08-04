@@ -1,0 +1,500 @@
+/* CSS Document */
+@import url('shared.css');
+
+html {/*font-size:81.3%;*/ font-size:13px}
+body { background:#efefef; line-height:normal; font-family: Verdana, Arial, Helvetica, sans-serif; text-align:center; color:#000 }
+.containerWidth, #container {width: 94%; /*max-width:1400px;*/ margin:0 auto; text-align:left}
+#container { margin: 0 auto; padding-top:3em}
+#content { width: auto !important; clear: both; background: #fff; border: 1px solid #ccc; padding:25px; -moz-box-shadow:0px 0px 15px #ccc;-webkit-box-shadow:0px 0px 15px #ccc; box-shadow: 0px 0px 15px #ccc}
+#header {margin-bottom:1em;position:relative}
+#copyright { font-size:small; margin: 0; padding: 10px 0 0 0;}
+#debug { float: right; text-align: right; margin-top: 0;}
+
+
+
+/*******************************************
+ * basic content formatting
+ *******************************************/
+.no-js .noJShide {display:none}
+
+h1 {margin:0.8em 0 0.6em; line-height:1.1em; color:#3D4F72; font-family:Arial, Helvetica, sans-serif; font-size:200%; font-weight:normal}
+.smalltext {font-size: 85%}
+.largetext { font-size: 116%; font-weight: bold;}
+.clear { clear: both; }
+.hidden { display: none; float: none; width: 1%;}
+.hiddenrow { display: none;}
+hr { background-color: #000000; color: #000000; height: 1px; border: 0px; }
+
+.opaque {opacity:.95;}
+.button, .button-layout2 {-moz-border-radius:3px;-webkit-border-radius:3px;border-radius:3px}
+.rounded {-moz-border-radius:10px;-webkit-border-radius:10px;border-radius:10px}
+.dropShadow {-moz-box-shadow:0px 0px 8px #777;-webkit-box-shadow:0px 0px 8px #777; box-shadow: 0px 0px 8px #777}
+.checkbox, .radio {vertical-align:middle; margin-right:0.5em}
+/* post icons */
+label input[type=radio] { vertical-align:middle}
+label img {margin-right:0.8em; vertical-align:middle; margin-left:-0.2em}
+
+/** Links **********************************/
+.post_body a {text-decoration:underline}
+#content a:hover {text-decoration:underline}
+
+/** Buttons ********************************/
+.button, .button-layout2, button {font-family:inherit; position:relative; cursor:pointer; text-transform:uppercase; letter-spacing:normal; line-height:2em; font-weight:bold; padding:0 1.5em; color:#fff !important; text-decoration:none !important; white-space:nowrap; border:1px solid #9BABCC; vertical-align:middle;
+background: #3D4F72;
+background: -moz-linear-gradient(top, #697999 0%, #3d4f72 100%);
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#697999), color-stop(100%,#3d4f72));
+background: -webkit-linear-gradient(top, #697999 0%,#3d4f72 100%);
+background: -o-linear-gradient(top, #697999 0%,#3d4f72 100%);
+background: -ms-linear-gradient(top, #697999 0%,#3d4f72 100%);
+background: linear-gradient(top, #697999 0%,#3d4f72 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#697999', endColorstr='#3d4f72',GradientType=0 );
+}
+a.button, a.button-layout2, label.button, label.button-layout2 { display:inline; display:-moz-inline-box; display:inline-block}
+.button, button {text-shadow: #333 0 -1px 0 }
+.button-layout2 {text-shadow: #999 0 -1px 0 }
+.button img, button img {border:0;vertical-align:middle}
+.button input, input.button, button {/*font-size:1em;*/ line-height:normal !important; height:1.95em; white-space:nowrap; vertical-align:bottom; width:auto; overflow:visible}
+
+.button-layout2 {border:1px solid #3D4F72;
+background: #9babcc;
+background: -moz-linear-gradient(top, #9babcc 0%, #697999 100%);
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#9babcc), color-stop(100%,#697999));
+background: -webkit-linear-gradient(top, #9babcc 0%,#697999 100%);
+background: -o-linear-gradient(top, #9babcc 0%,#697999 100%);
+background: -ms-linear-gradient(top, #9babcc 0%,#697999 100%);
+background: linear-gradient(top, #9babcc 0%,#697999 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#9babcc', endColorstr='#697999',GradientType=0 );
+}
+.button-disabled {background-color:#999}
+.button-small, tfoot .button, thead .button, .caption .button {font-size:85%;padding:0 1em;font-family:sans-serif;line-height:1.7em}
+.post-functions .button {font-size:76%;font-size:x-small}
+
+.button:hover, button:hover {color:#fff !important; text-shadow: #3D4F72 0 -1px 0; box-shadow:0 0 3px #ccc;
+background: #9babcc;
+background: -moz-linear-gradient(top, #9babcc 0%, #697999 100%);
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#9babcc), color-stop(100%,#697999));
+background: -webkit-linear-gradient(top, #9babcc 0%,#697999 100%);
+background: -o-linear-gradient(top, #9babcc 0%,#697999 100%);
+background: -ms-linear-gradient(top, #9babcc 0%,#697999 100%);
+background: linear-gradient(top, #9babcc 0%,#697999 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#9babcc', endColorstr='#697999',GradientType=0 );
+}
+.button-layout2:hover {border-color:#3D4F72;
+background: #3D4F72;
+background: -moz-linear-gradient(top, #697999 0%, #3d4f72 100%);
+background: -webkit-gradient(linear, left top, left bottom, color-stop(0%,#697999), color-stop(100%,#3d4f72));
+background: -webkit-linear-gradient(top, #697999 0%,#3d4f72 100%);
+background: -o-linear-gradient(top, #697999 0%,#3d4f72 100%);
+background: -ms-linear-gradient(top, #697999 0%,#3d4f72 100%);
+background: linear-gradient(top, #697999 0%,#3d4f72 100%);
+filter: progid:DXImageTransform.Microsoft.gradient( startColorstr='#697999', endColorstr='#3d4f72',GradientType=0 )
+}
+
+/** Tables ********************************/
+table { border-spacing:0; border-collapse:collapse; empty-cells:show}
+td {vertical-align:top; padding:4px;}
+
+thead th, .tcat { background: #9BABCC; color: #000000; font-size: 86%; padding: 2px 4px;}
+thead th a:link, .tcat a:link, thead th a:visited, .tcat a:visited { color: #000000;}
+thead th a:hover, thead th a:active, .tcat a:hover, .tcat a:active {	color: #666;}
+
+.trow1, tr.trow1 td { background: #f2f2f2;}
+.trow2, tr.trow2 td { background: #fcfcfc;}
+.trow_shaded, .trow_shaded td { background: #ffdde0;}
+.trow_selected td { background: #FFFBD9;}
+.trow_sep { background: #999; color: #fff; font-size: 12px; font-weight: bold;}
+
+tfoot td, .tfoot { background: #3D4F72; color: #ffffff;}
+tfoot a, .tfoot a:link, tfoot a:visited, .tfoot a:visited { color: #ffffff;}
+
+table.tborder {border-width:2px}
+.tborder {width: 100%; margin: auto auto; border: 1px solid #3D4F72;}
+.tborder td, .tborder th {border:1px solid #ccc}
+.tborder table td, .tborder table th {border:none}
+
+caption, .thead, .caption { background: #3D4F72 !important; color: #ffffff; text-align:left;}
+caption {line-height:1.1em; }
+caption, .caption {padding:8px}
+caption a, .caption a, .thead a, caption a:visited, .caption a:visited, .thead a:visited {color:#fff; text-decoration:underline}
+caption a:hover, .caption a:hover, .thead a:hover {text-decoration:none}
+.caption {clear:both}
+
+/*******************************************
+ * Basic Layout and Container
+ *******************************************/
+ 
+/** Global Menu bar ***********************/
+#topBar {background:#fff; color:#666; text-align:center; float:left; position:absolute; position:fixed; top:0; left:0; right:0; height:1.8em; line-height:1.8em; font-size:90%; z-index:9999}
+#topBar ul {margin:0 auto;padding:0;text-align:left;list-style:none; text-transform:uppercase;}
+#topBar li {float:left;border-right:1px solid #efefef;position:relative;overflow:visible}
+#topBar li.first {border-left:1px solid #efefef}
+#topBar a {display:block; float:left; padding:0 1em; color:#999;}
+#topBar a:visited {color:#999;}
+#topBar a:hover {background-color:#9BABCC;color:#fff}
+
+#topBar ul ul {display:none; width:15em; position:absolute; top:1.8em; left:-1px; background:#fff; border:1px solid #ccc; z-index:1}
+#topBar ul ul li {display:block; float:none; border:none; border-bottom:1px solid #ccc}
+#topBar ul ul a {float:none}
+#topBar .last ul {left:auto; right:-1px}
+#topBar li:hover ul {display:block;}
+#topBar li:hover a {background-color:#9BABCC; z-index:2}
+#topBar li:hover li a {background:none}
+#topBar li:hover li a:hover {background:#9BABCC}
+
+/** Footer menu ***********************/
+.bottommenu { background: #efefef; color: #000000; border: 1px solid #3D4F72; padding: 10px; clear:both; margin:1em 0;}
+
+/** Breadcrumb ***********************/
+#breadcrumb {padding:0;margin:0 0 -1px 0;list-style:none;font-size:86% !important; font-family:Tahoma, Geneva, sans-serif;background:#dfdfdf;float:left;width:100%}
+#breadcrumb li {display:inline;margin:0;padding:0}
+#breadcrumb a {float:left;padding:0.3em 1em;border-left:1px solid #ccc;border-bottom:1px solid #ccc; color:#666}
+#breadcrumb a:hover {background:#fff}
+#breadcrumb strong {float:left;padding:0.3em 1em;border-bottom:1px solid #fff;background:#fff;border-left:1px solid #ccc;border-right:1px solid #ccc;}
+
+/** Function bar above and below listings (forums, threads, posts) **/
+.functionBar {text-align:right; width:100%; float:left; margin:1em 0}
+.functionBar .pagination {float:left; margin:0}
+
+/** Legend on footer ******************/
+.legendBox {float:left;margin:1em 0}
+.legend {margin:1em 0;padding:0;font-size:85%; line-height:1em}
+.legend dt {float:left; margin:0 0.5em 0.5em 0; padding:0; clear:left; font-size:100%}
+.legend dt img {vertical-align:bottom;}
+.legend dd {margin: 0 0 0.5em;float:left}
+.legendBox .legend {float:left; white-space:nowrap; margin-right:2em}
+.lt-ie8 .legend dd {float:none}
+
+.forumLegend dt, .forumLegend dd {display:inline; float:none}
+.forumLegend dd {margin-right:2em}
+
+/** Moderator functions at the bottom of forums and threads ********/
+.moderatorFunctions {float:right; text-align:right; margin:1em 0}
+.moderatorFunctions form {margin:0 0 0.5em; padding:0}
+.moderatorFunctions .button {font-size:85%}
+
+/** Header area of forums and threads ********/
+#sectionHeader h1 {float:left;width:70%;margin-bottom:0}
+#sectionHeader {position:relative;width:100%;float:left;margin-bottom:1em;}
+#sectionHeader .functionBar {text-align:right;position:absolute; bottom:0; right:0;float:none;margin:0;z-index:0}
+#sectionHeader .pagination {float:left; clear:both; margin:1.5em 0 0; position:relative; z-index:2}
+
+/** Pagination *******************************/
+.pagination {display:block; margin:1em 0}
+.pagination_current, .pagination a { display:-moz-inline-box; display:inline-block; padding: 0 0.5em; line-height:1.7em; border: 1px solid #3D4F72;}
+.pagination a:hover {text-decoration:none !important;background:#9BABCC;color:#fff}
+.pagination .pages { font-weight: bold;}
+.pagination .pagination_current { background: #3D4F72; font-weight: bold; color: #fff; }
+.pagination_breadcrumb { background-color: #f5f5f5; border: 1px solid #fff; outline: 1px solid #ccc; padding: 5px; margin-top: 5px; font-weight: normal; white-space: nowrap;}
+.pagination_breadcrumb_link { vertical-align: middle; cursor: pointer;}
+
+.threadPagination {white-space:nowrap; font-size:85%;}
+
+
+/*******************************************
+ * MyBB MISC
+ *******************************************/
+.editor { background: #f1f1f1; border: 1px solid #ccc;}
+.editor_control_bar { background: #fff; border: 1px solid #3D4F72;}
+
+.autocomplete { background: #fff; border: 1px solid #000; color: black;}
+.autocomplete_selected { background: #adcee7; color: #000;}
+
+.popup_menu { background: #ccc; border: 1px solid #000;}
+.popup_menu .popup_item { background: #fff; color: #000;}
+.popup_menu .popup_item:hover { background: #C7DBEE; color: #000;}
+
+.trow_reputation_positive { background: #ccffcc;}
+.trow_reputation_negative { background: #ffcccc;}
+.reputation_positive { color: green;}
+.reputation_neutral { color: #444;}
+.reputation_negative { color: red;}
+
+.invalid_field { border: 1px solid #f30; color: #f30;}
+.valid_field { border: 1px solid #0c0;}
+.validation_error { background: url('../../images/invalid.gif') no-repeat center left; color:#f30; margin: 5px 0; padding: 5px; font-weight: bold; font-size: 11px; padding-left: 22px;}
+.validation_success { background: url('../../images/valid.gif') no-repeat center left; color: #00b200; margin: 5px 0; padding: 5px; font-weight: bold; font-size: 11px; padding-left: 22px; }
+.validation_loading { background: url(../../images/spinner.gif) no-repeat center left; color: #555; margin: 5px 0; padding: 5px; font-weight: bold; font-size: 11px;padding-left: 22px; }
+
+.selectall { background-color: #FFFBD9; font-weight: bold; text-align: center;}
+
+.float_left { float: left; }
+.float_right { float: right;}
+
+.menu ul { list-style: none; margin: 0;}
+.menu li { display: inline; padding-left: 5px;}
+.menu img { padding-right: 5px; vertical-align: top;}
+
+#panel .links { margin: 0; float: right;}
+
+.expcolimage { float: right; width:auto; vertical-align:middle; }
+
+img.attachment { border: 1px solid #E9E5D7; padding: 2px;}
+
+.subforumicon { border: 0; vertical-align: middle;}
+.separator { margin: 5px; padding: 0; height: 0px; font-size: 1px; list-style-type: none; }
+
+.popup_menu .popup_item_container { margin: 1px; text-align: left;}
+.popup_menu .popup_item { display: block; padding: 3px; text-decoration: none; white-space: nowrap;}
+.popup_menu a.popup_item:hover { text-decoration: none;}
+
+.autocomplete { text-align: left;}
+
+.highlight { background:#FC0; padding-top: 3px; padding-bottom: 3px;}
+
+.pm_alert { background: #FFF6BF; border: 1px solid #FFD324; text-align: center; padding: 5px 20px; margin-bottom: 15px; }
+.red_alert { background: #FBE3E4; border: 1px solid #A5161A; color: #A5161A; text-align: center; padding: 5px 20px; margin-bottom: 15px;}
+.high_warning { color: #CC0000; }
+.moderate_warning { color: #F3611B; }
+.low_warning { color: #AE5700; }
+
+div.error { padding: 5px 10px; border-top: 2px solid #FFD324; border-bottom: 2px solid #FFD324; background: #FFF6BF;}
+div.error p { margin: 0; color: #000; font-weight: normal;}
+div.error p em { font-style: normal; font-weight: bold; padding-left: 24px; display: block; color: #C00; background: url('../../images/error.gif') no-repeat 0;}
+div.error.ul { margin-left: 24px; }
+
+.quick_jump { background: url('../../images/jump.gif') no-repeat 0; width: 13px; height: 13px;
+	 padding-left: 13px; /* amount of padding needed for image to fully show */
+	vertical-align: middle; border: none;
+}
+.repbox { font-size:116%; font-weight: bold; padding:5px 7px 5px 7px;}
+._neutral { background-color:#FAFAFA; color: #999999; border:1px solid #CCCCCC; }
+._minus { background-color: #FDD2D1; color: #CB0200; border:1px solid #980201; }
+._plus { background-color:#E8FCDC; color: #008800; border:1px solid #008800; }
+
+.online { color: #15A018; }
+.offline { color: #C7C7C7; }
+
+.success_message { color: #00b200; font-weight: bold; margin-bottom: 10px; }
+.error_message { color: #C00; font-weight: bold; margin-bottom: 10px;}
+
+
+#registration_form {margin:0}
+
+
+/********* FIX TEXT EDITOR IN IE ***********/
+.messageEditor .toolbar_button { margin:2px 2px 0 0 !important; }
+.messageEditor .toolbar_button_group_last {margin-right:0 !important}
+
+#message {width:99%; height:250px}
+#quickreply #message {height:170px}
+
+/*******************************************
+ * INDEX
+ *******************************************/
+ 
+/** Welcome Panel **************************/
+#panel {	position:absolute; left:240px; right:0; bottom:10px; text-align:right; color: #000000; border: 1px solid #D4D4D4; padding: 8px;}
+
+#mainNav {float:left}
+#boardMenu {float:right}
+#boardMenu img {vertical-align:middle; margin-right:5px}
+#boardMenu .link-profile {font-weight:bold;color:#3D4F72 !important; padding-left:20px; background-image: url('../images/arrow-down.png'); background-position: 5px 50%; background-repeat:no-repeat}
+#boardMenu .pm-status-new, #boardMenu .pm-status-unread {background:#FFF6BF; color:#3D4F72; text-decoration:blink}
+#boardMenu .link-logout {background:#3D4F72 !important; color:#fff; font-weight:bold}
+
+#topFunctionBar {margin:0;padding:0;list-style:none;float:left;}
+#topFunctionBar li {margin:0 1em 0;padding:0;display:inline}
+
+#quick_login {position:absolute; left:240px; right:0; bottom:18px; line-height:1.2em}
+#quick_login .remember_me {margin:0 0.5em 0 1em}
+#quick_login .remember_me input {vertical-align: middle; margin-top: -1px;}
+#quick_login form {display:block;margin:0;padding:8px; border:1px solid #D4D4D4}
+#quick_login .textbox {width: 8em}
+#quick_login .button {font-size:85%}
+
+#welcomeMessage strong {font-size:200%; font-weight:normal; float:left; margin-right:1em;line-height:1.2em;vertical-align:middle}
+#welcomeMessage p {vertical-align:middle;}
+
+#boardStatistics {margin-top:1em}
+#boardStatistics tfoot {font-size:85%; text-align:right}
+
+
+
+
+/*******************************************
+ * SHOW FORUM
+ *******************************************/
+.forums {clear:both; margin:0}
+
+#forumSearch {display:inline;margin:0;padding:0}
+#forumSearch input {vertical-align:middle}
+
+.subforumLinks {margin-top:0.8em; line-height:1.2em}
+
+#forums .caption h2 {font-size:100%; margin:0}
+#forums .caption {margin:1em 0 0}
+.forum caption {padding-top:0}
+#forums .forum {margin-top:-8px; margin-bottom:1em}
+
+.col-status {width:2%}
+.col-icon {width:2%}
+.col-lastpost {width:16%; text-align:right; white-space:nowrap; font-size:85%}
+.col-ratings, .col-views, .col-posts, .col-threads, .col-forums {width:7%; text-align:center}
+.col-subject .author {font-size:85%}
+.col-subject strong a {margin-right:1em}
+.col-modoptions {white-space: nowrap; text-align:center}
+
+#forumHeader .forumDescription {float:left}
+
+.moderatorList {clear:both; margin:1em 0}
+
+.subject_old { color:#333; font-weight:normal }
+.subject_new { font-weight: bold;}
+
+
+/*********** SUBFORUMS *************/
+.subforums {margin-bottom:2em}
+
+
+/*********** THREADS *************/
+#rateThread {display:inline; margin-right:1em}
+ul.thread_tools, ul.thread_tools li { list-style: none; padding: 0; margin: 0;}
+ul.thread_tools li { padding-left: 26px; padding-bottom: 4px; margin-bottom: 3px; font-size:85% }
+ul.thread_tools li.printable { background: url('../../images/printable.gif') no-repeat 0px 0px; }
+ul.thread_tools li.sendthread { background: url('../../images/send.gif') no-repeat 0px 0px; }
+ul.thread_tools li.subscription_add { background: url('../../images/subscribe.gif') no-repeat 0px 0px;}
+ul.thread_tools li.subscription_remove { background: url('../../images/unsubscribe.gif') no-repeat 0px 0px;}
+
+
+/*********** POSTS *************/
+#posts {clear:both}
+
+.post {margin-bottom:5px}
+
+.post-header { text-align:right; border-bottom:1px solid #ccc; vertical-align:middle; font-size:smaller; line-height:2em; float:left; width:100% }
+.post .ipAddress {margin-right:3em}
+.post-date { margin-right: 1em }
+.post-subject {float:left;margin-left:1em}
+.post-id {margin-right:1em}
+
+.post-user { width:15%; padding-top:0.8em; padding-bottom:1em; /*min-width:180px;*/ text-align:center !important }
+td.post-functions {height:1em; vertical-align:middle; text-align:right; color:#000; background:none }
+.post-userFunctions {float:left}
+
+.post-body { padding: 1em; clear:both}
+.post-body img {max-width:800px !important; height:auto;}
+
+.post .username {font-size:123.5%;}
+.post .stars {display:block; margin:0.5em 0}
+.post .avatar { margin:0.8em 0; vertical-align:middle; }
+.post .button-small {line-height:1.4em;font-weight:normal}
+.post .link-quickDelete {background:#600}
+.post .link-quickDelete:hover {background-color:#C00}
+td.post-user, tfoot td.post-date {background-color:#E1E5ED}
+
+.multiquoteSelected {background:#9C0 !important; color:#000 !important; text-shadow:none}
+
+
+blockquote { border: 1px solid #999; margin: 1em 0; background: #E1E5ED; padding: 8px; -moz-box-shadow:0px 0px 10px #ccc;-webkit-box-shadow:0px 0px 10px #ccc; box-shadow: 0px 0px 10px #ccc }
+.trow1 blockquote {background-color:#D3D9E5}
+blockquote blockquote {margin:1em;background:#efefef !important }
+
+blockquote cite { font-weight: bold; border-bottom: 1px solid #ccc; font-style: normal; display: block; margin: 0 0 4px 0; }
+blockquote cite span { float: right; font-weight: normal; }
+blockquote cite span.highlight { float: none; font-weight: bold; padding-bottom: 0;}
+
+.codeblock { background: #fff; border: 1px solid #ccc; padding:4px;}
+.codeblock .title { border-bottom: 1px solid #ccc; font-weight: bold; margin: 4px 0; }
+.codeblock .body {overflow:auto}
+.codeblock code { overflow: auto; height: auto; max-height: 300px; display: block;}
+
+.signature {display:block; font-size:10px; color:#666; margin-top:1.5em; padding-left:1em}
+.signature hr {width:25%; margin:0 0 0.5em; padding:0; height:1px; border-width:0; border-top-width:1px}
+.signature img {max-height: 40px !important; width:auto !important}
+
+#quick_reply_form {clear:both;margin-top:-5px}
+.threadSearchBox {clear:both;padding:4px 8px; margin:0; text-align:right}
+.threadSearchBox form {display:inline;margin-left:2em}
+.threadSearchBoxBottom {margin-top:-5px}
+.threadNavi {float:left;font-size:85%;line-height:2em}
+
+
+
+
+/*##########################################
+ # STAR RATING
+ #
+ # Styles for the user control panel
+ ##########################################*/
+.star_rating,
+.star_rating li a:hover,
+.star_rating .current_rating { background: url('../../images/star_rating.gif') left -1000px repeat-x; vertical-align: middle;}
+
+.star_rating { position: relative; width:80px; height:16px; overflow: hidden; list-style: none; margin: 0; padding: 0; background-position: left top; display: inline; display: -moz-inline-box; display: inline-block; vertical-align:middle; text-indent:-1000px}
+td .star_rating { margin: auto;}
+
+.star_rating li {display: inline;}
+.star_rating li a,
+.star_rating .current_rating { position: absolute; height: 16px; line-height: 16px; outline: none; overflow: hidden; border: none; top:0; left:0;}
+.star_rating a em, .star_rating .current_rating em {position:absolute; left:-300px}
+.star_rating_notrated li a:hover { background-position: left bottom;}
+
+.star_rating li a.one_star { width:20%; z-index:6;}
+.star_rating li a.two_stars { width:40%; z-index:5;}
+.star_rating li a.three_stars { width:60%; z-index:4;}
+.star_rating li a.four_stars { width:80%; z-index:3;}
+.star_rating li a.five_stars { width:100%; z-index:2;}
+
+.star_rating .current_rating { z-index:1; background-position: left center;}
+.star_rating_success, .success_message { color: #00b200; font-weight: bold; font-size:small; margin-bottom: 10px;}
+
+
+
+/*##########################################
+ # USER CP
+ #
+ # Styles for the user control panel
+ ##########################################*/
+.usercp_nav_item { display: block; padding: 1px 0 1px 23px;}
+.usercp_nav_composepm { background: url('../../images/usercp/composepm.gif') no-repeat left center;}
+.usercp_nav_pmfolder { background: url('../../images/usercp/pmfolder.gif') no-repeat left center;}
+.usercp_nav_sub_pmfolder { padding-left: 40px; background: url('../../images/usercp/sub_pmfolder.gif') no-repeat left center;}
+.usercp_nav_trash_pmfolder { padding-left: 40px; background: url('../../images/usercp/trash_pmfolder.gif') no-repeat left center;}
+.usercp_nav_pmtracking { background: url('../../images/usercp/pmtracking.gif') no-repeat left center;}
+.usercp_nav_pmfolders { background: url('../../images/usercp/editfolders.gif') no-repeat left center;}
+.usercp_nav_profile { background: url('../../images/usercp/profile.gif') no-repeat left center;}
+.usercp_nav_email { padding-left: 40px; background: url('../../images/usercp/email.gif') no-repeat left center;}
+.usercp_nav_password { padding-left: 40px; background: url('../../images/usercp/password.gif') no-repeat left center;}
+.usercp_nav_username { padding-left: 40px; background: url('../../images/usercp/username.gif') no-repeat left center;}
+.usercp_nav_editsig { padding-left: 40px; background: url('../../images/usercp/editsig.gif') no-repeat left center;}
+.usercp_nav_avatar { padding-left: 40px; background: url('../../images/usercp/avatar.gif') no-repeat left center;}
+.usercp_nav_options { background: url('../../images/usercp/options.gif') no-repeat left center;}
+.usercp_nav_usergroups { background: url('../../images/usercp/usergroups.gif') no-repeat left center;}
+.usercp_nav_editlists { background: url('../../images/usercp/editlists.gif') no-repeat left center;}
+.usercp_nav_attachments { background: url('../../images/usercp/attachments.gif') no-repeat left center;}
+.usercp_nav_drafts { background: url('../../images/usercp/drafts.gif') no-repeat left center;}
+.usercp_nav_subscriptions { background: url('../../images/usercp/subscriptions.gif') no-repeat left center;}
+.usercp_nav_fsubscriptions { background: url('../../images/usercp/fsubscriptions.gif') no-repeat left center;}
+.usercp_nav_notepad { background: url('../../images/usercp/notepad.gif') no-repeat left center;}
+.usercp_nav_viewprofile { background: url('../../images/usercp/viewprofile.gif') no-repeat left center;}
+.usercp_nav_home { background: url('../../images/usercp/home.gif') no-repeat left center;}
+.usercp_notepad { width: 99%;}
+.usercp_container { margin: 5px; padding: 8px; border:1px solid #CCCCCC;}
+
+
+/*##########################################
+ # MOD CP
+ #
+ # Styles for the moderator control panel
+ ##########################################*/
+.modcp_nav_item { display: block; padding: 1px 0 1px 23px; }
+.modcp_nav_home { background: url('../../images/modcp/home.gif') no-repeat left center; }
+.modcp_nav_announcements { background: url('../../images/modcp/announcements.gif') no-repeat left center;}
+.modcp_nav_reports { background: url('../../images/modcp/reports.gif') no-repeat left center;}
+.modcp_nav_modqueue { background: url('../../images/modcp/modqueue.gif') no-repeat left center; }
+.modcp_nav_modlogs { background: url('../../images/modcp/modlogs.gif') no-repeat left center;}
+.modcp_nav_editprofile { background: url('../../images/modcp/editprofile.gif') no-repeat left center; }
+.modcp_nav_banning { background: url('../../images/modcp/banning.gif') no-repeat left center; }
+.modcp_nav_warninglogs { background: url('../../images/modcp/warninglogs.gif') no-repeat left center; }
+.modcp_nav_ipsearch { background: url('../../images/modcp/ipsearch.gif') no-repeat left center; }
+
+.modqueue_message { overflow: auto; max-height: 250px;}
+.modqueue_controls { width: 270px; float: right; text-align: center; border: 1px solid #ccc; background: #fff; padding: 6px; font-weight: bold;}
+.modqueue_controls label { margin-right: 8px;}
+
+.label_radio_ignore, .label_radio_delete, .label_radio_approve { font-weight: bold;}
+.modqueue_meta { color: #444; font-size: 95%; margin-bottom: 8px;}
+.modqueue_mass { list-style: none; margin: 0; width: 150px; padding: 0;}
+.modqueue_mass li { margin-bottom: 4px; padding: 0;}
+.modqueue_mass li a { display: block; padding: 4px; border: 1px solid transparent;}
+.modqueue_mass li a:hover { background: #efefef; border: 1px solid #ccc; text-decoration: none;}

@@ -1,0 +1,38 @@
+{$ignore_bit}
+<table class="post postStyle-classic tborder {$altbg}" style="{$post_visibility}" id="post_{$post['pid']}">
+	<tbody>
+	<tr>
+		<td id="pid{$post['pid']}" class="post-user">
+			<span class="username">{$post['profilelink']} {$post['onlinestatus']}<br /></span>
+			<span class="smalltext">
+				<span class="usertitle">{$post['usertitle']}<br /></span>
+				{$post['groupimage']}
+				{$post['useravatar']}
+				<span class="stars">{$post['userstars']}</span>
+				{$post['user_details']}
+			</span>
+		</td>
+		<td>
+			 {$post['posturl']} {$post['iplogged']} <strong class="smalltext">{$post['icon']}{$post['subject']} {$post['subject_extra']}</strong>
+			<br />
+			<div id="pid_{$post['pid']}" class="post_body">
+				{$post['message']}
+			</div>
+			{$post['attachments']}
+			{$post['signature']}
+			<div style="text-align: right;" id="post_meta_{$post['pid']}">
+				<div id="edited_by_{$post['pid']}">{$post['editedmsg']}</div>
+			</div>
+		</td>
+	</tr>
+	</tbody>
+	<tfoot>
+		<tr>
+			<td class="post-date"><small>{$post['postdate']} {$post['posttime']}</small></td>
+			<td class="post-functions">
+				<small class="post-userFunctions">{$post['button_email']}{$post['button_pm']}{$post['button_www']}{$post['button_find']}{$post['button_rep']}</small>
+				<span class="post-modFunctions">{$post['button_edit']}{$post['button_quote']}{$post['button_multiquote']}{$post['button_report']}{$post['button_warn']}{$post['button_reply_pm']}{$post['button_replyall_pm']}{$post['button_forward_pm']}{$post['button_quickdelete']}{$post['button_delete_pm']}</span>
+			</td>
+		</tr>
+	</tfoot>
+</table>

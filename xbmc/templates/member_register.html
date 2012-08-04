@@ -1,0 +1,146 @@
+<html>
+<head>
+<title>{$mybb->settings['bbname']} - {$lang->registration}</title>
+{$headerinclude}
+<script type="text/javascript" src="jscripts/validator.js"></script>
+</head>
+<body>
+{$header}
+<h1>Create a new Account</h1>
+<form action="member.php" method="post" id="registration_form">
+<div class="visuallyHidden"><input type="text" value="" name="regcheck1" /><input type="text" value="true" name="regcheck2" /></div>
+{$regerrors}
+<table class="tborder">
+	<caption><strong>Your account data</strong></caption>
+<tr>
+<td width="50%" class="trow1" valign="top">
+<fieldset class="trow2">
+<legend><strong>{$lang->account_details}</strong></legend>
+<table cellspacing="0" cellpadding="{$theme['tablespace']}" width="100%">
+<tr>
+<td colspan="2"><span class="smalltext"><label for="username">{$lang->username}</label></span></td>
+</tr>
+<tr>
+<td colspan="2"><input type="text" class="textbox" name="username" id="username" style="width: 100%" value="{$username}" /></td>
+</tr>
+{$passboxes}
+<tr>
+<td><span class="smalltext"><label for="email">{$lang->email}</label></span></td>
+<td><span class="smalltext"><label for="email2">{$lang->confirm_email}</label></span></td>
+</tr>
+<tr>
+<td><input type="text" class="textbox" name="email" id="email" style="width: 100%" maxlength="50" value="{$email}" /></td>
+<td><input type="text" class="textbox" name="email2" id="email2" style="width: 100%" maxlength="50" value="{$email2}" /></td>
+</tr>
+<tr>
+	<td colspan="2" style="display: none;" id="email_status">&nbsp;</td>
+</tr>
+{$hiddencaptcha}
+</table>
+</fieldset>
+{$requiredfields}
+{$referrer}
+{$regimage}
+</td>
+<td width="50%" class="trow1" valign="top">
+<fieldset class="trow2">
+<legend><strong>{$lang->account_prefs}</strong></legend>
+<table cellspacing="0" cellpadding="{$theme['tablespace']}" width="100%">
+<tr>
+<td valign="top" width="1"><input type="checkbox" class="checkbox" name="allownotices" id="allownotices" value="1" {$allownoticescheck} /></td>
+<td valign="top"><span class="smalltext"><label for="allownotices">{$lang->allow_notices}</label></span></td>
+</tr>
+<tr>
+<td valign="top" width="1"><input type="checkbox" class="checkbox" name="hideemail" id="hideemail" value="1" {$hideemailcheck} /></td>
+<td valign="top"><span class="smalltext"><label for="hideemail">{$lang->hide_email}</label></span></td>
+</tr>
+<tr>
+<td valign="top" width="1"><input type="checkbox" class="checkbox" name="receivepms" id="receivepms" value="1" {$receivepmscheck} /></td>
+<td valign="top"><span class="smalltext"><label for="receivepms">{$lang->receive_pms}</label></span></td>
+</tr>
+<tr>
+<td valign="top" width="1"><input type="checkbox" class="checkbox" name="pmnotice" id="pmnotice" value="1"{$pmnoticecheck} /></td>
+<td valign="top"><span class="smalltext"><label for="pmnotice">{$lang->pm_notice}</label></span></td>
+</tr>
+<tr>
+<td valign="top" width="1"><input type="checkbox" class="checkbox" name="emailpmnotify" id="emailpmnotify" value="1" {$emailpmnotifycheck} /></td>
+<td valign="top"><span class="smalltext"><label for="emailpmnotify">{$lang->email_notify_newpm}</label></span></td>
+</tr>
+<tr>
+<td valign="top" width="1"><input type="checkbox" class="checkbox" name="invisible" id="invisible" value="1" {$invisiblecheck} /></td>
+<td valign="top"><span class="smalltext"><label for="invisible">{$lang->invisible_mode}</label></span></td>
+</tr>
+<tr>
+<td colspan="2"><span class="smalltext"><label for="subscriptionmethod">{$lang->subscription_method}</label></span></td>
+</tr>
+<tr>
+<td colspan="2">
+	<select name="subscriptionmethod" id="subscriptionmethod">
+		<option value="0" {$no_subscribe_selected}>{$lang->no_auto_subscribe}</option>
+		<option value="1" {$no_email_subscribe_selected}>{$lang->no_email_subscribe}</option>
+		<option value="2" {$instant_email_subscribe_selected}>{$lang->instant_email_subscribe}</option>
+	</select>
+</td>
+</tr>
+
+</table>
+</fieldset>
+<br />
+<fieldset class="trow2">
+<legend><strong><label for="timezone">{$lang->time_offset}</label></strong></legend>
+<table cellspacing="0" cellpadding="{$theme['tablespace']}" width="100%">
+<tr>
+<td><span class="smalltext">{$lang->time_offset_desc}</span></td>
+</tr>
+<tr>
+<td>{$tzselect}</td>
+</tr>
+<tr>
+<td><span class="smalltext">{$lang->dst_correction}</span></td>
+</tr>
+<tr>
+<td>
+	<select name="dstcorrection">
+		<option value="2" {$dst_auto_selected}>{$lang->dst_correction_auto}</option>
+		<option value="1" {$dst_enabled_selected}>{$lang->dst_correction_enabled}</option>
+		<option value="0" {$dst_disabled_selected}>{$lang->dst_correction_disabled}</option>
+	</select>
+</td>
+</tr>
+</table>
+</fieldset>
+<br />
+<fieldset class="trow2">
+<legend><strong><label for="language">{$lang->lang_select}</label></strong></legend>
+<table cellspacing="0" cellpadding="{$theme['tablespace']}" width="100%">
+<tr>
+<td colspan="2"><span class="smalltext">{$lang->lang_select_desc}</span></td>
+</tr>
+<tr>
+<td><select name="language" id="language"><option value="">{$lang->lang_select_default}</option><option value="">-----------</option>{$langoptions}</select></td>
+</tr>
+</table>
+</fieldset>
+</td>
+</tr>
+</table>
+<br />
+<div align="center">
+<input type="hidden" name="step" value="registration" />
+<input type="hidden" name="action" value="do_register" />
+<input type="submit" class="button" name="regsubmit" value="{$lang->submit_registration}" />
+</div>
+</form>
+<script type="text/javascript">
+<!--
+	regValidator = new FormValidator('registration_form');
+	regValidator.register('username', 'notEmpty', {failure_message:'{$lang->js_validator_no_username}'});
+    regValidator.register('email', 'regexp', {match_field:'email2', regexp:'^([a-zA-Z0-9_\\.\\+\\-])+\\@(([a-zA-Z0-9\\-])+\\.)+([a-zA-Z0-9]{2,4})+$', failure_message:'{$lang->js_validator_invalid_email}'});
+	regValidator.register('email2', 'matches', {match_field:'email', status_field:'email_status', failure_message:'{$lang->js_validator_email_match}'});
+{$validator_extra}
+	regValidator.register('username', 'ajax', {url:'xmlhttp.php?action=username_availability', loading_message:'{$lang->js_validator_checking_username}'}); // needs to be last
+// -->
+</script>
+{$footer}
+</body>
+</html>

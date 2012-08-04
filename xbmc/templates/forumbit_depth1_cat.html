@@ -1,0 +1,21 @@
+<div class="caption">
+	<span class="expcolimage"><img src="{$theme['imgdir']}/{$expcolimage}" id="cat_{$forum['fid']}_img" class="expander" alt="{$expaltext}" title="{$expaltext}" /></span>
+	<h2><a href="{$forum_url}">{$forum['name']}</a></h2>
+</div>
+<table class="forum tborder" style="{$expdisplay}" id="cat_{$forum['fid']}_e">
+	<caption>
+		<small>{$forum['description']}</small>
+	</caption>
+	<thead>
+		<tr>
+			<th colspan="2">{$lang->forumbit_forum}</th>
+			<th class="col-threads">{$lang->forumbit_threads}</th>
+			<th class="col-posts">{$lang->forumbit_posts}</th>
+			<th class="col-lastpost">{$lang->forumbit_lastpost}</th>
+		</tr>
+	</thead>
+	<tbody>
+		{$sub_forums}
+	</tbody>
+</tbody>
+</table>

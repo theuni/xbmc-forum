@@ -1,0 +1,22 @@
+<br />
+<fieldset class="trow2">
+<legend><strong>{$lang->referrer}</strong></legend>
+<table cellspacing="0" cellpadding="{$theme['tablespace']}">
+<tr>
+<td><span class="smalltext"><label for="referrer">{$lang->referrer_desc}</label></span></td>
+</tr>
+<tr>
+<td>
+<input type="text" class="textbox" name="referrername" id="referrer" value="{$referrername}" style="width: 100%;" />
+</td>
+</tr></table>
+</fieldset>
+<script type="text/javascript" src="jscripts/autocomplete.js?ver=1400"></script>
+<script type="text/javascript">
+<!--
+	if(use_xmlhttprequest == "1")
+	{
+		new autoComplete("referrer", "xmlhttp.php?action=get_users", {valueSpan: "username"});
+	}
+// -->
+</script>

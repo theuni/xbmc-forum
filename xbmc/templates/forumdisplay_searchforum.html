@@ -1,0 +1,7 @@
+<form action="search.php" method="post">
+	<label for="searchbox{$fid}">{$lang->search_forum}</label>
+	<input type="text" id="searchbox{$fid}" class="textbox" name="keywords" /> {$gobutton}
+	<input type="hidden" name="action" value="do_search" />
+	<input type="hidden" name="forums" value="{$fid}" />
+	<input type="hidden" name="postthread" value="1" />
+</form>
