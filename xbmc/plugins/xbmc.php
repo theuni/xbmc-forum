@@ -6,7 +6,7 @@
  * Author: da-anda
  *
  */
- 
+
 // Disallow direct access to this file for security reasons
 if(!defined("IN_MYBB"))
 {
@@ -52,7 +52,7 @@ function xbmc_info()
 		"website"		=> "http://xbmc.org",
 		"author"			=> "Team XBMC",
 		"authorsite"	=> "http://xbmc.or",
-		"version"		=> "0.1beta",
+		"version"		=> "0.3beta",
 		"guid" 			=> "",
 		"compatibility" => "*"
 	);
@@ -113,6 +113,12 @@ function xbmc_info()
  */
 
 
+/**
+ * Is triggered after basic myBB initialization and prepares and injects
+ * custom variables, template adjustments and language labels
+ *
+ * @return void
+ */
 function xbmc_InitializeStart() {
 	global $mybb, $templates, $templatelist, $lang;
 
@@ -133,18 +139,31 @@ function xbmc_InitializeStart() {
 	require_once(MYBB_ROOT . 'xbmc/xclass/class_templates.php');
 	$templates = new xbmc_templates;
 	$templates->setTemplateFile(MYBB_ROOT . 'xbmc/theme/xbmc_theme.xml');
-	$templates->setTheme(3);
-	$templates->setTemplateSet(2);
+	$templates->setTheme(3); //ID of theme to override
+	$templates->setTemplateSet(2); // ID of template-set to adjust/update/override
 	
 	// add custom templates that should be globally available
 	$templatelist .= (strlen($templatelist) ? ',' : '') . 'headerbit_links_' . ($mybb->xbmc['isLoginUser'] ? 'user' : 'guest');
 }
 
+/**
+ * Is triggered by the single forum view
+ *
+ * @return void
+ */
 function xbmc_ForumDisplayStart() {
+	// override some language strings with custom translations
+	// without altering myBB core files
 	xbmc_OverrideLanguage();
 }
 
-function xbmc_RenderPost($post) {
+/**
+ * Adds additional fields to the post object for use in the post templates
+ *
+ * @param array	$post		The post to be rendered
+ * @return array The updated post
+ */
+function xbmc_RenderPost(array $post) {
 	global $thread;
 
 	// if subject is empty, copy it from the thread
@@ -157,6 +176,11 @@ function xbmc_RenderPost($post) {
 	return $post;
 }
 
+/**
+ * Adjusts the PM form
+ *
+ * @return void
+ */
 function xbmc_SendPrivateMessageFormEnd() {
 	global $options, $optionschecked;
 	// convert the "checked=checked" flag to a boolean value in order to be used as hidden field in the templates
@@ -166,6 +190,9 @@ function xbmc_SendPrivateMessageFormEnd() {
 
 /**
  * This method allows to manipulate the page output
+ *
+ * @param string	$content		The prerendered website
+ * @return string	The adjusted website html
  */
 function xbmc_PreOutputPage($content) {
 	global $lang, $templates, $mybb, $privatemessage_text, $theme, $modcplink, $admincplink;
@@ -193,7 +220,7 @@ function xbmc_PreOutputPage($content) {
 
 
 
-	// Add custom user menu items
+	// Add custom user menu items to top bar
 	if ($mybb->xbmc['isLoginUser']) {
 		if (isset($privatemessage_text) && strlen($privatemessage_text)) {
 			$mybb->xbmc['user']['pmStatus'] = 'new';
@@ -211,20 +238,32 @@ function xbmc_PreOutputPage($content) {
 	return $content;	
 }
 
-// allows to parse a Message after the default parser has parsed it
+/**
+ * allows to parse a Message after the default parser has parsed it
+ *
+ * @param string	$message		The incoming message/post/signature
+ * @return string	The modified/adjusted message
+ */
 function xbmc_ParseMessage($message) {
 	global $mybb;
 
+	// no direct links in signatures
 	if ($mybb->input['action'] == 'do_editsig' && $mybb->input['signature'] && strlen($message)) {
 		$message = preg_replace('!\(https?:\/\/[^[:space:]]*\)!i', '', $message);
 	}
+
+	//fix/drop sizes from old forum
 	$message = preg_replace('![size=[a-z_-]+\](.+?)\[/size\]!is', '$1', $message);
 	return $message;
 }
 
+/**
+ * Adds additional HTML to the website footer
+ *
+ * @param string	$page		The prerendered website
+ * @return string	The altered website HTML
+ */
 function xbmc_AddToFooter($page) {
-	// test if hooks run
-	#$page .= 'fooo bar';
 
 	// add analytics code
 	$page = str_replace('</body>', "
@@ -248,6 +287,12 @@ function xbmc_AddToFooter($page) {
 	return $page;
 }
 
+/**
+ * Block access to certain forum pages if no user is logged in
+ * to prevent crawlers from indexing/accessing sensible pages
+ *
+ * @return void
+ */
 function xbmc_DenyAccessToSectionIfNoValidUser() {
 	global $mybb;
 	if (!$mybb->user || $mybb->user['uid'] <= 0) {
@@ -257,6 +302,12 @@ function xbmc_DenyAccessToSectionIfNoValidUser() {
 	}
 }
 
+/**
+ * Override some language strings with custom translations
+ * without altering myBB core files
+ *
+ * @return void
+ */
 function xbmc_OverrideLanguage() {
 	global $lang;
 	$lfile = $lang->path."/".$lang->language."/xbmc.lang.php";
@@ -269,6 +320,13 @@ function xbmc_OverrideLanguage() {
 	}
 }
 
+/**
+ * Renders some debug output ONLY if the admin user is logged in
+ *
+ * @param string	$message	The debug message
+ * @param string	$title	The optional title/headline
+ * @return void
+ */
 function xbmc_debug($message, $title='') {
 	global $mybb;
 	if ($mybb->user['uid'] == 49419) {

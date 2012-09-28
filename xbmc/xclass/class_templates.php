@@ -84,6 +84,10 @@ class xbmc_templates extends templates
 			$this->updateCheck = TRUE;
 
 			if ($this->themeId == $theme['tid']) {
+
+				// remove all global CSS files and inject our merged file
+				// to reduce the requests on the server.
+				// But only remove global ones and not just all, because some forum scripts add additional css which is needed
 				$file = 'xbmc/css/styles.css';
 				if (@is_file(MYBB_ROOT . '/' . $file)) {
 					$customStyles = array();
