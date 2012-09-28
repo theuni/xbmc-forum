@@ -71,7 +71,7 @@ function get_subscribed_topic_func($xmlrpc_params)
 
 	// Fetch subscriptions
 	$query = $db->query("
-		SELECT s.*, t.*, t.username AS threadusername, u.username, u.username, u.avatar, if({$mybb->user['uid']} > 1 and s.uid = {$mybb->user['uid']}, 1, 0) as subscribed, po.message, f.name as forumname, IF(b.lifted > UNIX_TIMESTAMP(), 1, 0) as isbanned
+		SELECT s.*, t.*, t.username AS threadusername, u.username, u.username, u.avatar, if({$mybb->user['uid']} > 0 and s.uid = {$mybb->user['uid']}, 1, 0) as subscribed, po.message, f.name as forumname, IF(b.lifted > UNIX_TIMESTAMP() OR b.lifted = 0, 1, 0) as isbanned
 		FROM ".TABLE_PREFIX."threadsubscriptions s
 		LEFT JOIN ".TABLE_PREFIX."threads t ON (s.tid=t.tid)
 		LEFT JOIN ".TABLE_PREFIX."users u ON (u.uid = t.uid)
@@ -228,7 +228,6 @@ function get_subscribed_topic_func($xmlrpc_params)
 				'topic_title'       => new xmlrpcval($thread['subject'], 'base64'),
 				'topic_author_id'   => new xmlrpcval($thread['uid'], 'string'),
 				'post_author_name'  => new xmlrpcval($thread['username'], 'base64'),
-		'post_author_display_name'  => new xmlrpcval($thread['username'], 'base64'),
 				'can_subscribe'     => new xmlrpcval(true, 'boolean'), // implied by view permissions
 				'is_subscribed'     => new xmlrpcval((boolean)$thread['subscribed'], 'boolean'),
 				'is_closed'         => new xmlrpcval((boolean)$thread['closed'], 'boolean'),

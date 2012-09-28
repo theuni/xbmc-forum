@@ -87,7 +87,7 @@ function save_raw_post_func($xmlrpc_params)
 	}
 		
 	// Check if this forum is password protected and we have a valid password
-	check_forum_password($forum['fid']);
+	tt_check_forum_password($forum['fid']);
 
 	// Set up posthandler.
 	require_once MYBB_ROOT."inc/datahandlers/post.php";
@@ -105,11 +105,15 @@ function save_raw_post_func($xmlrpc_params)
 		"edit_uid" => $mybb->user['uid'],
 		"message" => $input['post_content'],
 	);
+	
+	// get subscription status
+	$query = $db->simple_select("threadsubscriptions", 'notification', "uid='".intval($mybb->user['uid'])."' AND tid='".intval($tid)."'");
+	$substatus = $db->fetch_array($query);
 
 	// Set up the post options from the input.
 	$post['options'] = array(
 		"signature" => 1,
-		"subscriptionmethod" => "",
+		"subscriptionmethod" => isset($substatus['notification']) ? ($substatus['notification'] == 1 ? 'instant' : 'none') : '',
 		"disablesmilies" => 0
 	);
 

@@ -67,7 +67,7 @@ function get_quote_post_func($xmlrpc_params)
 		return tt_no_permission();
 	}
 	
-	check_forum_password($forum['fid']);
+	tt_check_forum_password($forum['fid']);
 	
 	
 	// Check to see if the thread is closed, and if the user is a mod.

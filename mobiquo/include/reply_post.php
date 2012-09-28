@@ -8,9 +8,9 @@ require_once MYBB_ROOT."inc/class_parser.php";
 
 
 function reply_post_func($xmlrpc_params)
-{	
+{
 	global $db, $lang, $theme, $plugins, $mybb, $session, $settings, $cache, $time, $mybbgroups;
-	
+
 	$input = Tapatalk_Input::filterXmlInput(array(
 			'forum_id' => Tapatalk_Input::INT,
 			'topic_id' => Tapatalk_Input::INT,
@@ -20,12 +20,12 @@ function reply_post_func($xmlrpc_params)
 			'group_id' => Tapatalk_Input::STRING,
 			'return_html' => Tapatalk_Input::INT,
 	), $xmlrpc_params);
-	
+
 	$lang->load("newreply");
 	$parser = new postParser;
-	
+
 	$tid = $input['topic_id'];
-		
+
 	$options = array(
 		"limit" => 1
 	);
@@ -44,9 +44,9 @@ function reply_post_func($xmlrpc_params)
 	{
 		return xmlrespfalse($lang->error_invalidforum);
 	}
-		
+
 	$forumpermissions = forum_permissions($fid);
-		
+
 	if(($thread['visible'] == 0 && !is_moderator($fid)) || $thread['visible'] < 0)
 	{
 		return xmlrespfalse($lang->error_invalidthread);
@@ -64,10 +64,10 @@ function reply_post_func($xmlrpc_params)
 	{
 		return tt_no_permission();
 	}
-	
-	check_forum_password($forum['fid']);
-	
-	
+
+	tt_check_forum_password($forum['fid']);
+
+
 	// Check to see if the thread is closed, and if the user is a mod.
 	if(!is_moderator($fid, "caneditposts"))
 	{
@@ -86,12 +86,12 @@ function reply_post_func($xmlrpc_params)
 	{
 		$ismod = false;
 	}
-	
+
 	if(!empty($input['group_id']))
 		$posthash = $input['group_id'];
 	else
 		$posthash = md5($thread['tid'].$mybb->user['uid'].random_str());
-	
+
 	if($mybb->settings['maxposts'] > 0 && $mybb->usergroup['cancp'] != 1)
 	{
 		$daycut = TIME_NOW-60*60*24;
@@ -103,10 +103,10 @@ function reply_post_func($xmlrpc_params)
 			return xmlrespfalse($lang->error_maxposts);
 		}
 	}
-	
+
 		$username = $mybb->user['username'];
 		$uid = $mybb->user['uid'];
-		
+
 		$user_check = "p.uid='{$uid}'";
 		$query = $db->simple_select("posts p", "p.pid, p.visible", "{$user_check} AND p.tid='{$thread['tid']}' AND p.subject='".$db->escape_string($mybb->input['subject'])."' AND p.message='".$db->escape_string($mybb->input['message'])."' AND p.posthash='".$db->escape_string($mybb->input['posthash'])."' AND p.visible != '-2'");
 		$duplicate_check = $db->fetch_field($query, "pid");
@@ -114,11 +114,11 @@ function reply_post_func($xmlrpc_params)
 		{
 			return xmlrespfalse($lang->error_post_already_submitted);
 		}
-			
-		
+
+
 	require_once MYBB_ROOT."inc/datahandlers/post.php";
 	$posthandler = new PostDataHandler("insert");
-		
+
 	$post = array(
 		"tid" => $input['topic_id'],
 		"replyto" => 0,
@@ -157,11 +157,11 @@ function reply_post_func($xmlrpc_params)
 	{
 		$post_errors = $posthandler->get_friendly_errors();
 	}
-	
+
 	// Mark thread as read
 	require_once MYBB_ROOT."inc/functions_indicators.php";
 	mark_thread_read($tid, $fid);
-	
+
 	// One or more errors returned, fetch error list and throw to newreply page
 	if(count($post_errors) > 0)
 	{
@@ -172,7 +172,7 @@ function reply_post_func($xmlrpc_params)
 		$postinfo = $posthandler->insert_post();
 		$pid = $postinfo['pid'];
 		$visible = $postinfo['visible'];
-		
+
 		// Deciding the fate
 		if($visible == -2)
 		{
@@ -186,14 +186,18 @@ function reply_post_func($xmlrpc_params)
 		{
 			$state = 1;
 		}
-	}	
-	
+	}
+
 	$pid = intval($pid);
 	$db->update_query("attachments", array("pid" => $pid), "posthash='{$input['group_id_esc']}'");
-		
+
+	// update thread attachment account
+	if (count($input['attachment_id_array']) > 0)
+	    update_thread_counters($tid, array("attachmentcount" => "+".count($input['attachment_id_array'])));
+
 	$post = get_post($pid);
-	
-	$parser_options = array();    
+
+	$parser_options = array();
 	$parser_options['allow_html'] = false;
 	$parser_options['allow_mycode'] = true;
 	$parser_options['allow_smilies'] = false;
@@ -201,12 +205,12 @@ function reply_post_func($xmlrpc_params)
 	$parser_options['allow_videocode'] = true;
 	$parser_options['nl2br'] = (boolean)$input['return_html'];
 	$parser_options['filter_badwords'] = 1;
-	
+
 	if(!$post['username'])
 	{
 		$post['username'] = $lang->guest;
 	}
-	
+
 	if($post['userusername'])
 	{
 		$parser_options['me_username'] = $post['userusername'];
@@ -215,9 +219,9 @@ function reply_post_func($xmlrpc_params)
 	{
 		$parser_options['me_username'] = $post['username'];
 	}
-	
+
 	$post['message'] = $parser->parse_message($post['message'], $parser_options);
-	
+
 	global $attachcache;
 	$attachcache = array();
 	if($thread['attachmentcount'] > 0)
@@ -231,7 +235,7 @@ function reply_post_func($xmlrpc_params)
 	}
 
 	$attachment_list = process_post_attachments($post['pid'], $post);
-	
+
 	$can_delete = 0;
 	if($mybb->user['uid'] == $post['uid'])
 	{
@@ -245,8 +249,8 @@ function reply_post_func($xmlrpc_params)
 		}
 	}
 	$can_delete = (is_moderator($fid, "candeleteposts") || $can_delete == 1) && $mybb->user['uid'] != 0;
-	
-		
+
+
 	$result = new xmlrpcval(array(
 		'result'        => new xmlrpcval(true, 'boolean'),
 		'result_text'   => new xmlrpcval('', 'base64'),
@@ -258,6 +262,6 @@ function reply_post_func($xmlrpc_params)
 		'post_time'     => new xmlrpcval(mobiquo_iso8601_encode(TIME_NOW), 'dateTime.iso8601'),
 		'attachments'   => new xmlrpcval($attachment_list, 'array'),
 	), 'struct');
-		
+
 	return new xmlrpcresp($result);
 }

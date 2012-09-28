@@ -124,6 +124,7 @@ class Tapatalk_xmlrpcs extends xmlrpc_server {
 			error_log('XML-RPC: xmlrpc_server::service: http headers already sent before response is fully generated. Check for php warning or error messages');
 		}
 		
+		@ob_end_clean();
 		print $payload;
 
 		// return request, in case subclasses want it

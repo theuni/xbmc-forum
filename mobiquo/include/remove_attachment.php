@@ -42,7 +42,7 @@ function remove_attachment_func($xmlrpc_params)
 		return tt_no_permission();
 	}
 
-	check_forum_password($forum['fid']);
+	tt_check_forum_password($forum['fid']);
    
 	$posthash = $input['group_id'];
 	if(empty($posthash)){

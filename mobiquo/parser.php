@@ -5,8 +5,8 @@ defined('IN_MOBIQUO') or exit;
 require_once MYBB_ROOT."inc/class_parser.php";
 
 class Tapatalk_Parser extends postParser {
-	
-	
+
+
 	/**
 	* Parses quote MyCode.
 	*
@@ -59,16 +59,16 @@ class Tapatalk_Parser extends postParser {
 		}
 		return $message;
 	}
-	
-	
-	
+
+
+
 	function mycode_parse_video($video, $url)
 	{
 		return "[url]{$url}[/url]";
 	}
 
-	
-	
+
+
 	/**
 	* Parses quotes with post id and/or dateline.
 	*
@@ -105,7 +105,7 @@ class Tapatalk_Parser extends postParser {
 			{
 				eval("\$linkback = \" ".$templates->get("postbit_gotopost", 1, 0)."\";");
 			}
-			
+
 			$username = preg_replace("#(?:&quot;|\"|')? pid=(?:&quot;|\"|')?[0-9]+[\"']?(?:&quot;|\"|')?#i", '', $username);
 			$delete_quote = false;
 		}
@@ -140,12 +140,12 @@ class Tapatalk_Parser extends postParser {
 			{
 				$span = "<span>{$date}</span>";
 			}
-			
+
 			return "[quote]{$username} $lang->wrote\n{$message}[/quote]\n";
 		}
 	}
-	
-	
+
+
 	/**
 	 * Generates a cache of MyCode, both standard and custom.
 	 *
@@ -182,7 +182,7 @@ class Tapatalk_Parser extends postParser {
 
 		$standard_mycode['email_complex']['regex'] = "#\[email=(.*?)\](.*?)\[/email\]#ei";
 		$standard_mycode['email_complex']['replacement'] = "\$this->mycode_parse_email(\"$1\", \"$2\")";
-		
+
 		$nestable_mycode['color']['regex'] = "#\[color=([a-zA-Z]*|\#?[0-9a-fA-F]{6})](.*?)\[/color\]#si";
 		$nestable_mycode['color']['replacement'] = "<font color=\"$1\">$2</font>";
 
@@ -197,13 +197,13 @@ class Tapatalk_Parser extends postParser {
 
 		$nestable_mycode['align']['regex'] = "#\[align=(left|center|right|justify)\](.*?)\[/align\]#si";
 		$nestable_mycode['align']['replacement'] = '$2';
-		
+
 		// Assign the nestable MyCode to the cache.
 		foreach($nestable_mycode as $code)
 		{
 			$this->mycode_cache['nestable'][] = array('find' => $code['regex'], 'replacement' => $code['replacement']);
 		}
-		
+
 		// Assign the MyCode to the cache.
 		foreach($standard_mycode as $code)
 		{
@@ -211,7 +211,7 @@ class Tapatalk_Parser extends postParser {
 			$this->mycode_cache['standard']['replacement'][] = $code['replacement'];
 		}
 	}
-	
+
 	/**
 	* Parses code MyCode.
 	*
@@ -223,7 +223,7 @@ class Tapatalk_Parser extends postParser {
 	{
 		return $code;
 	}
-	
+
 	/**
 	* Parses PHP code MyCode.
 	*
@@ -236,7 +236,7 @@ class Tapatalk_Parser extends postParser {
 	{
 		return $str;
 	}
-	
+
 	/**
 	 * Parses MyCode tags in a specific message with the specified options.
 	 *
@@ -253,17 +253,17 @@ class Tapatalk_Parser extends postParser {
 		{
 			$this->cache_mycode();
 		}
-		
+
 		// Parse quotes first
 		$message = $this->mycode_parse_quotes($message);
-		
+
 		$message = $this->mycode_auto_url($message);
 
 		$message = str_replace('$', '&#36;', $message);
-				
+
 		// Replace the rest
 		$message = preg_replace($this->mycode_cache['standard']['find'], $this->mycode_cache['standard']['replacement'], $message);
-		
+
 		// Replace the nestable mycode's
 		foreach($this->mycode_cache['nestable'] as $mycode)
 		{
@@ -293,7 +293,7 @@ class Tapatalk_Parser extends postParser {
 			$message = preg_replace("#\[img align=([a-z]+)\](\r\n?|\n?)(https?://([^<>\"']+?))\[/img\]#ise", "\$this->mycode_parse_img('$3', array(), '$1');", $message);
 			$message = preg_replace("#\[img=([0-9]{1,3})x([0-9]{1,3}) align=([a-z]+)\](\r\n?|\n?)(https?://([^<>\"']+?))\[/img\]#ise", "\$this->mycode_parse_img('$5', array('$1', '$2'), '$3');", $message);
 		}
-		
+
 		// Convert videos when allow.
 		if($options['allow_videocode'] != 0)
 		{
@@ -302,9 +302,9 @@ class Tapatalk_Parser extends postParser {
 
 		return $message;
 	}
-	
-	
-	
+
+
+
 	/**
 	* Parses list MyCode.
 	*
@@ -332,7 +332,7 @@ class Tapatalk_Parser extends postParser {
 		return $list;
 	}
 
-	
+
 	/**
 	* Parses URL MyCode.
 	*
@@ -352,16 +352,16 @@ class Tapatalk_Parser extends postParser {
 
 		$url = str_replace('&amp;', '&', $url);
 		$name = str_replace('&amp;', '&', $name);
-		
+
 		if(!$name)
 		{
 			$name = $url;
 		}
-		
+
 		$name = str_replace("\'", "'", $name);
 		$url = str_replace("\'", "'", $url);
 		$fullurl = str_replace("\'", "'", $fullurl);
-		
+
 		if($name == $url && (!isset($this->options['shorten_urls']) || $this->options['shorten_urls'] != 0))
 		{
 			if(my_strlen($url) > 55)
@@ -369,7 +369,7 @@ class Tapatalk_Parser extends postParser {
 				$name = my_substr($url, 0, 40)."...".my_substr($url, -10);
 			}
 		}
-		
+
 		// Fix some entities in URLs
 		$entities = array('$' => '%24', '&#36;' => '%24', '^' => '%5E', '`' => '%60', '[' => '%5B', ']' => '%5D', '{' => '%7B', '}' => '%7D', '"' => '%22', '<' => '%3C', '>' => '%3E', ' ' => '%20');
 		$fullurl = str_replace(array_keys($entities), array_values($entities), $fullurl);
@@ -392,10 +392,7 @@ class Tapatalk_Parser extends postParser {
 		$url = trim($url);
 		$url = str_replace("\n", "", $url);
 		$url = str_replace("\r", "", $url);
-		
-		return "[img]{$url}[/img]";            
-			
+
+		return "[img]{$url}[/img]";
 	}
-	
-	
 }

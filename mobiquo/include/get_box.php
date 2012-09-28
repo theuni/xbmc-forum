@@ -116,8 +116,10 @@ function get_box_func($xmlrpc_params)
 		}
 	}
 	
+	$user_online = $folder == 1 ? ', fu.lastactive, fu.invisible, fu.lastvisit ' : ', tu.lastactive, tu.invisible, tu.lastvisit ';
+	
 	$query = $db->query("
-		SELECT pm.*, fu.username AS fromusername, tu.username as tousername, fu.avatar as favatar, tu.avatar as tavatar
+		SELECT pm.*, fu.username AS fromusername, tu.username as tousername, fu.avatar as favatar, tu.avatar as tavatar $user_online
 		FROM ".TABLE_PREFIX."privatemessages pm
 		LEFT JOIN ".TABLE_PREFIX."users fu ON (fu.uid=pm.fromid)
 		LEFT JOIN ".TABLE_PREFIX."users tu ON (tu.uid=pm.toid)
@@ -157,6 +159,7 @@ function get_box_func($xmlrpc_params)
 			$msg_from = null;
 			$msg_to = array();
 			$avatar = "";
+			$outboxdisplayuserid = 0;
 		//	if($folder == 2 || $folder == 3)
 			{ // Sent Items or Drafts Folder Check
 				$recipients = unserialize($message['recipients']);
@@ -167,6 +170,12 @@ function get_box_func($xmlrpc_params)
 						$profilelink = get_profile_link($uid);
 						$user = $cached_users[$uid];
 						$msg_to[]=new xmlrpcval($user['username'], "base64");
+						
+						if (($folder == 2 or $folder == 3) && !$outboxdisplayuserid)
+						{
+						    $outboxdisplayuserid = $uid;
+						}
+						
 					}
 					/*if(is_array($recipients['bcc']) && count($recipients['bcc']))
 					{
@@ -191,6 +200,7 @@ function get_box_func($xmlrpc_params)
 				}
 				$avatar = $message['tavatar'];
 			}
+			
 			if($folder != 2 && $folder != 3)
 			{
 				$tofromusername = $message['fromusername'];
@@ -208,6 +218,14 @@ function get_box_func($xmlrpc_params)
 				$msg_from = $tofromusername;
 				$avatar = $message['favatar'];
 			}
+			else
+			{
+			    if ($outboxdisplayuserid)
+			    {
+			        $outboxdisplayuser = get_user($outboxdisplayuserid);
+			        $avatar = $outboxdisplayuser['avatar'];
+			    }
+			}
 			
 			
 			if(!trim($message['subject']))
@@ -215,9 +233,12 @@ function get_box_func($xmlrpc_params)
 				$message['subject'] = $lang->pm_no_subject;
 			}
 				
-			$timesearch = TIME_NOW - $mybb->settings['wolcutoffmins']*60;
-			$query2 = $db->simple_select("sessions", "location,nopermission", "uid='{$message['fromid']}' AND time>'{$timesearch}'", array('order_by' => 'time', 'order_dir' => 'DESC', 'limit' => 1));
-			$session = $db->fetch_array($query2);
+        	$is_online = false;
+        	$timecut = TIME_NOW - $mybb->settings['wolcutoff'];
+        	if($message['lastactive'] > $timecut && ($message['invisible'] != 1 || $mybb->usergroup['canviewwolinvis'] == 1) && $message['lastvisit'] != $message['lastactive'])
+        	{
+        		$is_online = true;
+        	}
 			
 			$new_message = array(
 				'msg_id'          => new xmlrpcval($message['pmid'], 'string'),
@@ -227,7 +248,7 @@ function get_box_func($xmlrpc_params)
 				'icon_url'        => new xmlrpcval(absolute_url($avatar), 'string'),
 				'msg_subject'     => new xmlrpcval($message['subject'], 'base64'),
 				'short_content'   => new xmlrpcval(process_short_content($message['message'], $parser), 'base64'),
-				'is_online'       => new xmlrpcval(($mybb->usergroup['canviewwolinvis'] == 1 || $message['fromid'] == $mybb->user['uid']) && !empty($session), 'boolean'),
+				'is_online'       => new xmlrpcval($is_online, 'boolean'),
 			);
 			
 			if($msg_from !== null)

@@ -6,6 +6,7 @@ require_once MYBB_ROOT."inc/functions_post.php";
 require_once MYBB_ROOT."inc/functions_user.php";
 require_once MYBB_ROOT."inc/class_parser.php";
 require_once MYBB_ROOT."inc/datahandlers/pm.php";
+require_once TT_ROOT . 'parser.php';
 
 function get_message_func($xmlrpc_params)
 {    
@@ -142,15 +143,36 @@ function get_message_func($xmlrpc_params)
 
 	// Fetch the recipients for this message
 	$pm['recipients'] = @unserialize($pm['recipients']);
-
+    
 	if(is_array($pm['recipients']['to']))
 	{
 		$uid_sql = implode(',', $pm['recipients']['to']);
+		foreach($pm['recipients']['to'] as $uid)
+		{
+		    $user = get_user($uid);
+		    $msg_to_list[] = new xmlrpcval(array(
+                'user_id'   => new xmlrpcval($user['uid'], 'string'),
+                'username'  => new xmlrpcval(basic_clean($user['username']), 'base64'),
+            ), 'struct');
+            
+            if (($pm['folder'] == 2 or $pm['folder'] == 3) && !$avatar)
+            {
+                $avatar = $user['avatar'];
+            }
+		}
 	}
 	else
 	{
-		$uid_sql = $pm['toid'];
-		$pm['recipients']['to'] = array($pm['toid']);
+		$user = get_user($pm['toid']);
+		$msg_to_list[] = new xmlrpcval(array(
+            'user_id'   => new xmlrpcval($user['uid'], 'string'),
+            'username'  => new xmlrpcval(basic_clean($user['username']), 'base64'),
+        ), 'struct');
+        
+        if (($pm['folder'] == 2 or $pm['folder'] == 3))
+        {
+            $avatar = $user['avatar'];
+        }
 	}
 
 	$show_bcc = 0;
@@ -158,40 +180,36 @@ function get_message_func($xmlrpc_params)
 	// If we have any BCC recipients and this user is an Administrator, add them on to the query
 	if(count($pm['recipients']['bcc']) > 0 && $mybb->usergroup['cancp'] == 1)
 	{
-		$show_bcc = 1;
-		$uid_sql .= ','.implode(',', $pm['recipients']['bcc']);
-	}
-	
-	
-	
-	// Fetch recipient names from the database
-	$bcc_recipients = $to_recipients = $msg_to_list = array();
-	$query = $db->simple_select('users', 'uid, username', "uid IN ({$uid_sql})");
-	while($recipient = $db->fetch_array($query))
-	{
-		// User is a BCC recipient
-		if(($show_bcc && in_array($recipient['uid'], $pm['recipients']['bcc'])) || in_array($recipient['uid'], $pm['recipients']['to']))
+		foreach($pm['recipients']['bcc'] as $uid)
 		{
-			$msg_to_list[] = new xmlrpcval(array("username" => new xmlrpcval($recipient['username'], "base64")), "struct");
+		    $user = get_user($uid);
+		    $msg_to_list[] = new xmlrpcval(array(
+                'user_id'   => new xmlrpcval($user['uid'], 'string'),
+                'username'  => new xmlrpcval(basic_clean($user['username']), 'base64'),
+            ), 'struct');
 		}
 	}
-		
+	
+	if (!$avatar) $avatar = $pm['avatar'];
+	
 	//$display_user = ($box_id == 'inbox') ? $message['from'] : $msg_to[0];
-
-	$timesearch = TIME_NOW - $mybb->settings['wolcutoffmins']*60;
-	$query2 = $db->simple_select("sessions", "location,nopermission", "uid='{$pm['fromid']}' AND time>'{$timesearch}'", array('order_by' => 'time', 'order_dir' => 'DESC', 'limit' => 1));
-	$session = $db->fetch_array($query2);
+	$is_online = false;
+	$timecut = TIME_NOW - $mybb->settings['wolcutoff'];
+	if($pm['lastactive'] > $timecut && ($pm['invisible'] != 1 || $mybb->usergroup['canviewwolinvis'] == 1) && $pm['lastvisit'] != $pm['lastactive'])
+	{
+		$is_online = true;
+	}
 	
 	$result = new xmlrpcval(array(
 		'result'        => new xmlrpcval(true, 'boolean'),
 		'result_text'   => new xmlrpcval('', 'base64'),
 		'msg_from'      => new xmlrpcval($pm['username'], 'base64'),
 		'msg_to'        => new xmlrpcval($msg_to_list, 'array'),
-		'icon_url'      => new xmlrpcval(absolute_url($pm['avatar']), 'string'),
+		'icon_url'      => new xmlrpcval(absolute_url($avatar), 'string'),
 		'sent_date'     => new xmlrpcval(mobiquo_iso8601_encode($pm['dateline']), 'dateTime.iso8601'),
 		'msg_subject'   => new xmlrpcval($pm['subject'], 'base64'),
 		'text_body'     => new xmlrpcval(process_post($pm['message'], $input['return_html']), 'base64'),
-		'is_online'     => new xmlrpcval(($mybb->usergroup['canviewwolinvis'] == 1 || $message['fromid'] == $mybb->user['uid']) && !empty($session), 'boolean'),
+		'is_online'     => new xmlrpcval($is_online, 'boolean'),
 		'allow_smilies' => new xmlrpcval(true, 'boolean'), 
 	), 'struct');
 

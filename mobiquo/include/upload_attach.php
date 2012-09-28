@@ -4,12 +4,11 @@ defined('IN_MOBIQUO') or exit;
 
 require_once MYBB_ROOT."inc/functions_post.php";
 require_once MYBB_ROOT."inc/functions_user.php";
+require_once TT_ROOT.'parser.php';
 
 function upload_attach_func($xmlrpc_params)
 {
 	global $db, $lang, $theme, $plugins, $mybb, $session, $settings, $cache, $time, $mybbgroups;
-	
-	chdir("../");
 	
 	$lang->load("member");
 	
@@ -45,7 +44,7 @@ function upload_attach_func($xmlrpc_params)
 	}
 
 	// Check if this forum is password protected and we have a valid password
-	check_forum_password($forum['fid']);
+	tt_check_forum_password($forum['fid']);
    
 	$posthash = $input['group_id'];
 	if(empty($posthash)){

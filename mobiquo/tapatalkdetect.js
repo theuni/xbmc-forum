@@ -1,29 +1,71 @@
 function detectTapatalk() {
-	if (document.cookie.indexOf("tapatalk_redirect=false") < 0) {
-		if (!navigator.userAgent.match(/Opera/i) && !navigator.userAgent.match(/Dolphin/i)) {
+	if (document.cookie.indexOf("tapatalk_redirect4=false") < 0) {
+		if (!navigator.userAgent.match(/Opera/i)) {
+
 			if ((navigator.userAgent.match(/iPhone/i)) || (navigator.userAgent.match(/iPod/i))) {
 				setTapatalkCookies();
 				if (confirm("This forum has an app for iPhone and iPod Touch! Click OK to learn more about Tapatalk."))
-					window.location = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewSoftware?id=307880732&mt=8";
+					window.location = "http://itunes.apple.com/us/app/tapatalk-forum-app/id307880732?mt=8";
 			} else if(navigator.userAgent.match(/iPad/i)) {
 				setTapatalkCookies();
 				if (confirm("This forum has an app for iPad! Click OK to learn more about Tapatalk."))
-					window.location = "http://itunes.apple.com/WebObjects/MZStore.woa/wa/viewSoftware?id=307880732&mt=8";
-			} else if(navigator.userAgent.match(/android/i)) {
+					window.location = "http://itunes.apple.com/us/app/tapatalk-hd-for-ipad/id481579541?mt=8";
+			} else if(navigator.userAgent.match(/Kindle Fire/i)) {
 				setTapatalkCookies();
-				if (confirm("This forum has an app for Android phone! Click OK to learn more about Tapatalk."))
+				if (confirm("This forum has an app for Kindle Fire! Click OK to learn more about Tapatalk."))
+					window.location = "http://www.amazon.com/gp/mas/dl/android?p=com.quoord.tapatalkpro.activity";
+			} else if(navigator.userAgent.match(/Android/i)) {
+				setTapatalkCookies();
+				if (confirm("This forum has an app for Android. Click OK to learn more about Tapatalk."))
 					window.location = "market://details?id=com.quoord.tapatalkpro.activity";
-			} else if((navigator.userAgent.match(/Windows Phone/i)) || (navigator.userAgent.match(/ZuneWP7/i))) {
+			} else if(navigator.userAgent.match(/BlackBerry/i)) {
 				setTapatalkCookies();
-				if (confirm("This forum has an app for Windows Phone! Click OK to learn more about BoardExpress."))      
-					window.location = "zune://navigate/?phoneAppID=ac6eeb5d-e7da-df11-a844-00237de2db9e";
-			} else if(navigator.userAgent.match(/webOS/i)) {
+				if (confirm("This forum has an app for BlackBerry! Click OK to learn more about Tapatalk."))	  
+					window.location = "http://appworld.blackberry.com/webstore/content/46654?lang=en";
+			} else if(window.chrome) {
 				setTapatalkCookies();
-				if (confirm("This forum has an app for webOS phone! Click OK to learn more about Tapatalk."))      
-					window.location = "http://developer.palm.com/appredirect/?packageid=com.newnessdevelopments.forums";
+				var script1 = document.createElement('script');
+				var script2;
+				script1.setAttribute('src','mobiquo/tapatalkdetect/jquery-1.7.min.js');
+				script1.setAttribute('type','text/javascript');
+				var loaded=false;
+				var loaded2=false;
+				var loaded3=false;
+				var loadFunction3 = function() {
+					var notice = '<div class="notice">'
+						+ '<div class="notice-body">' 
+						+ '<p>Download <a href="https://chrome.google.com/webstore/detail/plfhcjljnfjpfcbjpgnflfofmahljkjj" target="_new">Tapatalk Notifier</a> for Chrome to keep notified of new Private Messages from this forum. <br /></p>'
+						+ '</div>'
+						+ '</div>';
+					$( notice ).purr(
+						{
+							usingTransparentPNG: true,
+							removeTimer:12000
+						}
+					);	
+				}
+
+				var loadFunction = function() {
+
+					var script2=document.createElement("link");
+					script2.setAttribute("rel", "stylesheet");
+					script2.setAttribute("type", "text/css");
+					script2.setAttribute("href", 'mobiquo/tapatalkdetect/notice.css');
+					script2.media='screen';
+ 
+					document.getElementsByTagName("head")[0].appendChild(script2);
+					var script3 = document.createElement('script');
+					script3.setAttribute('src','mobiquo/tapatalkdetect/jquery.purr.js');
+					script3.setAttribute('type','text/javascript');
+					script3.onload=loadFunction3;
+					document.getElementsByTagName("head")[0].appendChild(script3);
+
+				};
+				script1.onload = loadFunction;
+				document.getElementsByTagName("head")[0].appendChild(script1);
 			}
-		}
-	}
+        }
+    }
 }
 
 function setTapatalkCookies() {
@@ -31,7 +73,8 @@ function setTapatalkCookies() {
 	var days = 90;
 	date.setTime(date.getTime()+(days*24*60*60*1000));
 	var expires = "; expires="+ date.toGMTString();
-	document.cookie = "tapatalk_redirect=false" + expires; 
+	var domain = "; path=/";
+	document.cookie = "tapatalk_redirect4=false" + expires + domain; 
 }
 
 detectTapatalk();

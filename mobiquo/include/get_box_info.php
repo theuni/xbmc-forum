@@ -110,5 +110,5 @@ function get_box_info_func($xmlrpc_params)
 		'list'               => new xmlrpcval($folder_list, 'array'),
 	), 'struct');
 
-	return new xmlrpcresp($result);
+	return $result;
 }

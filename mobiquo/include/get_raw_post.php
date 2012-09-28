@@ -81,7 +81,7 @@ function get_raw_post_func($xmlrpc_params)
 	}
 		
 	// Check if this forum is password protected and we have a valid password
-	check_forum_password($forum['fid']);
+	tt_check_forum_password($forum['fid']);
 
 	$result = new xmlrpcval(array(
 		'post_id'       => new xmlrpcval($post['pid'], 'string'),

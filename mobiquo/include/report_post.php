@@ -36,7 +36,7 @@ function report_post_func($xmlrpc_params)
 		exit;
 	}
 
-	check_forum_password($forum['parentlist']);
+	tt_check_forum_password($forum['parentlist']);
 
 	$thread = get_thread($post['tid']);
 
