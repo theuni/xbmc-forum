@@ -521,7 +521,7 @@ messageEditor.prototype = {
 	createDropDownMenu: function(options)
 	{
 		var dropdown = document.createElement('div');
-		dropdown.itemType = options.type;
+		dropdown.elementType = options.type;
 		if(options.image || options.sprite)
 			dropdown.className = 'toolbar_dropdown_image';
 		else
@@ -626,7 +626,7 @@ messageEditor.prototype = {
 		element = Event.element(e);
 		if(!element)
 			return;
-		if(!element.itemType)
+		if(!element.elementType)
 			element = this.getElementToolbarItem(element);
 		
 		var mnu = $(element).down('ul');
@@ -667,6 +667,7 @@ messageEditor.prototype = {
 		this.openDropDownMenu.style.display = 'none';
 		this.getElementToolbarItem(this.openDropDownMenu).removeClassName('editor_dropdown_menu_open');
 		var dropDown = this.getElementToolbarItem(this.openDropDownMenu);
+		this.removeElementState(this.openDropDownMenu.parentNode, 'clicked');
 		this.removeElementState(element, 'clicked');
 		this.openDropDownMenu = null;
 		Event.stopObserving(document, 'click', this.hideOpenDropDownMenu.bindAsEventListener(this));
@@ -766,7 +767,7 @@ messageEditor.prototype = {
 				toolbar.lastChild.previousSibling.className += ' toolbar_button_group_last';
 			}
 			var separator = document.createElement("span");
-			separator.itemType = options.type;
+			separator.elementType = options.type;
 			separator.className = "toolbar_sep";
 			toolbar.insertBefore(separator, toolbar.lastChild);
 		}
@@ -775,7 +776,7 @@ messageEditor.prototype = {
 	createToolbarButton: function(options)
 	{
 		var button = document.createElement('span');
-		button.itemType = options.type;
+		button.elementType = options.type;
 		button.id = 'editor_item_'+options.name;
 		if(typeof(options.title) != 'undefined')
 		{
@@ -915,7 +916,7 @@ messageEditor.prototype = {
 		if(!element)
 			return false;
 
-		if(!element.itemType)
+		if(!element.elementType)
 			element = 	this.getElementToolbarItem(element);
 
 		if(element.disabled)
@@ -947,7 +948,7 @@ messageEditor.prototype = {
 		if(!element)
 			return false;
 
-		if(!element.itemType)
+		if(!element.elementType)
 			element = this.getElementToolbarItem(element);
 
 		if(element.disabled)
@@ -964,7 +965,7 @@ messageEditor.prototype = {
 		if(!element)
 			return false;
 
-		if(!element.itemType)
+		if(!element.elementType)
 			element = this.getElementToolbarItem(element);
 
 		if(element.disabled)
@@ -1166,7 +1167,7 @@ messageEditor.prototype = {
 							this.removeElementState(elem, 'clicked');
 						}
 
-						if(elem && (elem.itemType == "dropdown" || elem.dropdown || elem.menu))
+						if(elem && (elem.elementType == "dropdown" || elem.dropdown || elem.menu))
 						{
 							this.setDropDownMenuActiveItem(elem, 0);
 						}
@@ -1377,7 +1378,7 @@ messageEditor.prototype = {
 				}
 				if(tag)
 				{
-					if(tag.itemType == "dropdown" || tag.dropdown || tag.menu)
+					if(tag.elementType == "dropdown" || tag.dropdown || tag.menu)
 					{
 						this.setDropDownMenuActiveItem(tag, 0);
 					}
