@@ -88,6 +88,7 @@ function get_message_func($xmlrpc_params)
 	$parser_options['allow_videocode'] = true;
 	$parser_options['nl2br'] = (boolean)$input['return_html'];
 	$parser_options['filter_badwords'] = 1;
+	$pm['message'] = post_bbcode_clean($pm['message']);
 	$pm['message'] = $parser->parse_message($pm['message'], $parser_options);
 
 	if($pm['receipt'] == 1)
@@ -153,6 +154,7 @@ function get_message_func($xmlrpc_params)
 		    $msg_to_list[] = new xmlrpcval(array(
                 'user_id'   => new xmlrpcval($user['uid'], 'string'),
                 'username'  => new xmlrpcval(basic_clean($user['username']), 'base64'),
+				'user_type' => check_return_user_type($user['username']),
             ), 'struct');
             
             if (($pm['folder'] == 2 or $pm['folder'] == 3) && !$avatar)
@@ -167,6 +169,7 @@ function get_message_func($xmlrpc_params)
 		$msg_to_list[] = new xmlrpcval(array(
             'user_id'   => new xmlrpcval($user['uid'], 'string'),
             'username'  => new xmlrpcval(basic_clean($user['username']), 'base64'),
+			'user_type' => check_return_user_type($user['username']),
         ), 'struct');
         
         if (($pm['folder'] == 2 or $pm['folder'] == 3))
@@ -186,6 +189,7 @@ function get_message_func($xmlrpc_params)
 		    $msg_to_list[] = new xmlrpcval(array(
                 'user_id'   => new xmlrpcval($user['uid'], 'string'),
                 'username'  => new xmlrpcval(basic_clean($user['username']), 'base64'),
+				'user_type' => check_return_user_type($user['username']),
             ), 'struct');
 		}
 	}

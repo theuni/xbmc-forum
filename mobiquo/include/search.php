@@ -22,6 +22,7 @@ add_breadcrumb($lang->nav_search, "search.php");
 switch($mybb->input['action'])
 {
     case "results":
+    	$mybb->input['sid'] = $_GET['sid'];
         add_breadcrumb($lang->nav_results);
         break;
     default:

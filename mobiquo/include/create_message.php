@@ -9,7 +9,7 @@ require_once MYBB_ROOT."inc/datahandlers/pm.php";
 
 function create_message_func($xmlrpc_params)
 {	
-	global $db, $lang, $theme, $plugins, $mybb, $session, $settings, $cache, $time, $mybbgroups;
+	global $db, $lang, $theme, $plugins, $mybb, $session, $settings, $cache, $time, $mybbgroups , $pminfo , $pm;
 	
 	$input = Tapatalk_Input::filterXmlInput(array(
 		'user_name' => Tapatalk_Input::RAW,
@@ -84,6 +84,7 @@ function create_message_func($xmlrpc_params)
 	else
 	{
 		$pminfo = $pmhandler->insert_pm();
+		$plugins->run_hooks("private_do_send_end");
 	}
 		
 	return xmlresptrue();

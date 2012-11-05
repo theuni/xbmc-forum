@@ -521,7 +521,12 @@ $server_param = array(
         'docstring' => '',
     ),
     
-    
+    'get_alert' => array(
+    	'function' => 'get_alert_func',
+    	'signature' => array(array($xmlrpcStruct),
+    						 array($xmlrpcStruct, $xmlrpcInt),
+    						 array($xmlrpcStruct, $xmlrpcInt, $xmlrpcInt)),
+    ),
     //**********************************************
     // Puch related functions
     //**********************************************

@@ -21,17 +21,27 @@ function get_thread_by_unread_func($xmlrpc_params)
 
     $thread = get_thread($input['topic_id']);
 
+    if(is_moderator($thread['fid']))
+    {
+        $visible = "AND (p.visible='0' OR p.visible='1')";
+    }
+    else
+    {
+        $visible = "AND p.visible='1'";
+    }
+
     $query = $db->query("select p.pid from ".TABLE_PREFIX."posts p
         LEFT JOIN ".TABLE_PREFIX."threadsread tr on p.tid = tr.tid and tr.uid = '{$mybb->user['uid']}'
-        where p.tid='{$thread['tid']}' and tr.dateline < p.dateline
+        where p.tid='{$thread['tid']}' and tr.dateline < p.dateline $visible
         order by p.dateline desc
         limit 1");
     $pid = $db->fetch_field($query, 'pid');
-    if(!$pid){
+    if(!$pid)
+    {
         $query = $db->query("select p.pid from ".TABLE_PREFIX."posts p
-        where p.tid='{$thread['tid']}'
-        order by p.dateline desc
-        limit 1");
+                             where p.tid='{$thread['tid']}' $visible
+                             order by p.dateline desc
+                             limit 1");
         $pid = $db->fetch_field($query, 'pid');
     }
 

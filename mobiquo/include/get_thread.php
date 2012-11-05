@@ -269,11 +269,10 @@ function get_thread_func($xmlrpc_params)
         {
             $is_online = true;
         }
-
+        $post['message'] = post_bbcode_clean($post['message']);
         // Post content and attachments
         $post['message'] = $parser->parse_message($post['message'], $parser_options);
         $attachment_list = process_post_attachments($post['pid'], $post);
-
         // add for thank/like support
         $post = $plugins->run_hooks("postbit", $post);
 
@@ -361,12 +360,20 @@ function get_thread_func($xmlrpc_params)
         'can_upload'      => new xmlrpcval($forumpermissions['canpostattachments'] != 0, 'boolean'),
         //'can_subscribe'   => new xmlrpcval(true, 'boolean'), // default as true, so don't need to return
     );
-
+	if($forumpermissions['canview'] == 0 || $forumpermissions['canviewthreads'] == 0)
+	{
+		$new_topic['can_subscribe']  = new xmlrpcval(false, 'boolean');
+	}
+	else 
+	{
+		$new_topic['can_subscribe']  = new xmlrpcval(true, 'boolean');
+	}
     if ($thread['prefix'])  $result['prefix']        = new xmlrpcval(basic_clean($thread['displayprefix']), 'base64');
     if (!$thread['visible'])$result['is_approved']   = new xmlrpcval(false, 'boolean'); // default as true
     if ($thread['closed'])  $result['is_closed']     = new xmlrpcval(true, 'boolean');
     if ($thread['sticky'])  $result['is_sticky']     = new xmlrpcval(true, 'boolean');
     if ($subscribed)        $result['is_subscribed'] = new xmlrpcval(true, 'boolean');
+    else                    $result['is_subscribed'] = new xmlrpcval(false, 'boolean');
     if ($isbanned)          $result['is_ban']        = new xmlrpcval(true, 'boolean');
     if ($can_reply)         $result['can_reply']     = new xmlrpcval(true, 'boolean');
     if ($position)          $result['position']      = new xmlrpcval(intval($position), 'int');

@@ -9,7 +9,7 @@ require_once MYBB_ROOT."inc/class_parser.php";
 
 function reply_post_func($xmlrpc_params)
 {
-	global $db, $lang, $theme, $plugins, $mybb, $session, $settings, $cache, $time, $mybbgroups;
+	global $db, $lang, $theme, $plugins, $mybb, $session, $settings, $cache, $time, $mybbgroups,$tid, $pid, $visible, $thread;
 
 	$input = Tapatalk_Input::filterXmlInput(array(
 			'forum_id' => Tapatalk_Input::INT,
@@ -142,7 +142,7 @@ function reply_post_func($xmlrpc_params)
 	// Set up the post options from the input.
 	$post['options'] = array(
 		"signature" => 1,
-		"subscriptionmethod" => "",
+		"subscriptionmethod" => $mybb->user['subscriptionmethod'] == 0 ? '':$mybb->user['subscriptionmethod'],
 		"disablesmilies" => 0
 	);
 
@@ -172,7 +172,7 @@ function reply_post_func($xmlrpc_params)
 		$postinfo = $posthandler->insert_post();
 		$pid = $postinfo['pid'];
 		$visible = $postinfo['visible'];
-
+        $plugins->run_hooks("newreply_do_newreply_end");
 		// Deciding the fate
 		if($visible == -2)
 		{
@@ -256,6 +256,9 @@ function reply_post_func($xmlrpc_params)
 		'result_text'   => new xmlrpcval('', 'base64'),
 		'post_id'       => new xmlrpcval($postinfo['pid'], 'string'),
 		'state'         => new xmlrpcval($state, 'int'),
+	'post_author_id'    => new xmlrpcval($mybb->user['uid'], 'string'),
+	'post_author_name'  => new xmlrpcval(basic_clean($mybb->user['username']), 'base64'),
+	'icon_url'          => new xmlrpcval(absolute_url($mybb->user['avatar']), 'string'),
 		'post_content'  => new xmlrpcval(process_post($post['message'], $input['return_html']), 'base64'),
 		'can_edit'      => new xmlrpcval(is_moderator($fid, "caneditposts") || $thread['closed'] == 0 && $forumpermissions['caneditposts'] == 1, 'boolean'),
 		'can_delete'    => new xmlrpcval($can_delete, 'boolean'),

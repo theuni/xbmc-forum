@@ -32,19 +32,32 @@ function login_func($xmlrpc_params)
     $loginattempts = $db->fetch_field($query, "loginattempts");
 
     $errors = array();
-
     $user = validate_password_from_username($input['username'], $input['password']);
+    $correct = false;
     if(!$user['uid'])
     {
-        my_setcookie('loginattempts', $logins + 1);
-        $db->update_query("users", array('loginattempts' => 'loginattempts+1'), "LOWER(username) = '".my_strtolower($input['username_esc'])."'", 1, true);
-
-        if($mybb->settings['failedlogincount'] != 0 && $mybb->settings['failedlogintext'] == 1)
+        if(validate_email_format($input['username']))
         {
-            $login_text = $lang->sprintf($lang->failed_login_again, $mybb->settings['failedlogincount'] - $logins);
+        	$mybb->settings['username_method'] = 1;
+        	$user = validate_password_from_username($input['username'], $input['password']);
         }
-
-        $errors[] = $lang->error_invalidpworusername.$login_text;
+        if(!$user['uid'])
+        {
+        	my_setcookie('loginattempts', $logins + 1);
+	        $db->update_query("users", array('loginattempts' => 'loginattempts+1'), "LOWER(username) = '".my_strtolower($input['username_esc'])."'", 1, true);
+	
+	        if($mybb->settings['failedlogincount'] != 0 && $mybb->settings['failedlogintext'] == 1)
+	        {
+	            $login_text = $lang->sprintf($lang->failed_login_again, $mybb->settings['failedlogincount'] - $logins);
+	        }
+	
+	        $errors[] = $lang->error_invalidpworusername.$login_text;
+        }
+        else 
+        {
+        	 $correct = true;
+        }
+        
     }
     else
     {

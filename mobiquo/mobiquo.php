@@ -1,10 +1,8 @@
 <?php
-
 define('IN_MOBIQUO', true);
 define('MOBIQUO_DEBUG', 0);
 define('TT_ROOT', getcwd() . DIRECTORY_SEPARATOR);
 define('TT_PATH', basename(TT_ROOT));
-
 @ob_start();
 error_reporting(MOBIQUO_DEBUG);
 
@@ -16,8 +14,11 @@ require_once './mobiquo_common.php';
 require_once './input.php';
 require_once './xmlrpcresp.php';
 require_once './env_setting.php';
-
-
+if($_SERVER['REQUEST_METHOD'] == 'GET')
+{
+	require 'web.php';
+	exit;
+}
 $rpcServer = new Tapatalk_xmlrpcs($server_param, false);
 $rpcServer->setDebug(1);
 $rpcServer->compress_response = 'true';

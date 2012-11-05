@@ -397,10 +397,19 @@ function get_topic_func($xmlrpc_params)
                 'view_number'       => new xmlrpcval(intval($thread['views']), 'int'),
                 'is_approved'       => new xmlrpcval($thread['visible'], 'boolean'),
             );
-            
+        	$forumpermissions = forum_permissions($thread['fid']);
+			if($forumpermissions['canview'] == 0 || $forumpermissions['canviewthreads'] == 0)
+			{
+				$new_topic['can_subscribe']  = new xmlrpcval(false, 'boolean');
+			}
+			else 
+			{
+				$new_topic['can_subscribe']  = new xmlrpcval(true, 'boolean');
+			}
             if ($unreadpost)                                $new_topic['new_post']       = new xmlrpcval(true, 'boolean');
             if ($thread['sticky'])                          $new_topic['is_sticky']      = new xmlrpcval(true, 'boolean');
             if ($thread['subscribed'])                      $new_topic['is_subscribed']  = new xmlrpcval(true, 'boolean');
+            else                                            $new_topic['is_subscribed']  = new xmlrpcval(false, 'boolean');
             if ($thread['closed'])                          $new_topic['is_closed']      = new xmlrpcval(true, 'boolean');
             if ($thread['isbanned'])                        $new_topic['is_ban']         = new xmlrpcval(true, 'boolean');
             if ($mybb->usergroup['canmodcp'] == 1)          $new_topic['can_ban']        = new xmlrpcval(true, 'boolean');

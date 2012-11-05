@@ -150,15 +150,46 @@ function processForum($forum)
     $lightbulb = get_forum_lightbulb($forum, $lastpost_data, $showlockicon);
 
     $new_post = $lightbulb['folder'] == 'on';
-
+	$logo_url = '';
+	//@todo
+	$tapatalk_forum_icon_dir = './forum_icons/';
+	$tapatalk_forum_icon_url = MYBB_ROOT . $mybb->settings['tapatalkdir'];
+	if($forum['type'] == c)
+	{
+		$forum_type = 'category';
+	}
+	else if(!empty($forum['linkto']))
+	{
+		$forum_type = 'link';
+	}
+	else 
+	{
+		$forum_type = 'forum';
+    }
+	if(empty($forum['forum_image']))
+	{
+		$logo_url = get_forum_icon(2,$forum_type);
+	}
+	else if (!empty($forum['password']))
+	{
+		$logo_url = get_forum_icon(2,$forum_type,true);
+	}
+	else if(!empty($forum['unread_count']))
+	{
+		$logo_url = get_forum_icon(2,$forum_type,false,true);
+	}
+    else if ($forum['forum_image'])
+    {
+        $logo_url = MYBB_ROOT . $forum['forum_image'];
+    }
     $xmlrpc_forum = new xmlrpcval(array(
         'forum_id'      => new xmlrpcval($forum['fid'], 'string'),
         'forum_name'    => new xmlrpcval(basic_clean($forum['name']), 'base64'),
         'description'   => new xmlrpcval($forum['description'], 'base64'),
         'parent_id'     => new xmlrpcval($forum['pid'], 'string'),
-        //'logo_url'      => new xmlrpcval($icon, 'string'),
+        'logo_url'      => new xmlrpcval($logo_url, 'string'),
         'new_post'      => new xmlrpcval($new_post, 'boolean'),
-        'unread_count'  => new xmlrpcval(!empty($node['hasNew']) ? $node['hasNew'] : 0, 'int'),
+        'unread_count'  => new xmlrpcval($forum['unread_count'], 'int'),
         'is_protected'  => new xmlrpcval(!empty($forum['password']), 'boolean'),
         'url'           => new xmlrpcval($forum['linkto'], 'string'),
         'sub_only'      => new xmlrpcval($forum['type'] == 'c', 'boolean'),
@@ -183,7 +214,6 @@ function treeBuild($pid, &$fcache, &$xml_nodes, &$done)
             {
                 // Get the permissions for this forum
                 $permissions = $forumpermissions[$forum['fid']];
-
                 // If this user doesnt have permission to view this forum and we're hiding private forums, skip this forum
                 if($permissions['canview'] != 1 && $mybb->settings['hideprivateforums'] == 1)
                 {

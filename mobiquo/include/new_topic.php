@@ -105,7 +105,7 @@ function new_topic_func($xmlrpc_params)
 	// Set up the thread options from the input.
 	$new_thread['options'] = array(
 		"signature" => 1,
-		"subscriptionmethod" => "",
+		"subscriptionmethod" => $mybb->user['subscriptionmethod'] == 0 ? '':$mybb->user['subscriptionmethod'],
 		"disablesmilies" => 0
 	);
 	

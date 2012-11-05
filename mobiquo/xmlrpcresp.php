@@ -123,3 +123,30 @@ function thl_func()
         'result_result' => new xmlrpcval('This feature is not supported', 'base64'),
     ), 'struct'));
 }
+
+function get_alert_func()
+{
+	global $alertData;
+	$return_array = array();
+	foreach ($alertData as $data)
+	{
+		$return_array[] =new xmlrpcval(array(
+			'user_id' => new xmlrpcval($data['author_id'],'string'),
+			'username' => new xmlrpcval($data['author'],'base64'),
+			'user_type' => check_return_user_type($data['author']),
+			'icon_url' => new xmlrpcval($data['icon_url'],'string'),
+			'message' => new xmlrpcval($data['message'],'base64'),
+			'timestamp' => new xmlrpcval($data['create_time'],'string'),
+			'content_type' => new xmlrpcval($data['data_type'],'string'),
+			'content_id' => new xmlrpcval($data['data_id'],'string'),
+			)
+			,'struct'
+		);
+	}
+	
+	$result = new xmlrpcval(array(
+		'total' => new xmlrpcval(count($alertData),'int'),
+		'items' => new xmlrpcval($return_array,'array'),
+	),'struct');
+	return $result;
+}

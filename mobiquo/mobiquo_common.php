@@ -529,3 +529,232 @@ function shutdown()
         }
     }
 }
+
+function get_forum_icon($id, $type = 'forum', $lock = false, $new = false)
+{
+    if (!in_array($type, array('link', 'category', 'forum')))
+        $type = 'forum';
+    
+    $icon_name = $type;
+    if ($type != 'link')
+    {
+        if ($lock) $icon_name .= '_lock';
+        if ($new) $icon_name .= '_new';
+    }
+    
+    $icon_map = array(
+        'category_lock_new' => array('category_lock', 'category_new', 'lock_new', 'category', 'lock', 'new'),
+        'category_lock'     => array('category', 'lock'),
+        'category_new'      => array('category', 'new'),
+        'lock_new'          => array('lock', 'new'),
+        'forum_lock_new'    => array('forum_lock', 'forum_new', 'lock_new', 'forum', 'lock', 'new'),
+        'forum_lock'        => array('forum', 'lock'),
+        'forum_new'         => array('forum', 'new'),
+        'category'          => array(),
+        'forum'             => array(),
+        'lock'              => array(),
+        'new'               => array(),
+        'link'              => array(),
+    );
+    
+    $final = empty($icon_map[$icon_name]);
+    
+    if ($url = get_forum_icon_by_name($id, $icon_name, $final))
+        return $url;
+    
+    foreach ($icon_map[$icon_name] as $sub_name)
+    {
+        $final = empty($icon_map[$sub_name]);
+        if ($url = get_forum_icon_by_name($id, $sub_name, $final))
+            return $url;
+    }
+    
+    return '';
+}
+
+function get_forum_icon_by_name($id, $name, $final)
+{
+    global $tapatalk_forum_icon_dir, $tapatalk_forum_icon_url;
+    
+    $filename_array = array(
+        $name.'_'.$id.'.png',
+        $name.'_'.$id.'.jpg',
+        $id.'.png', $id.'.jpg',
+        $name.'.png',
+        $name.'.jpg',
+    );
+    
+    foreach ($filename_array as $filename)
+    {
+        if (file_exists($tapatalk_forum_icon_dir.$filename))
+        {
+            return $tapatalk_forum_icon_url.$filename;
+        }
+    }
+    
+    if ($final) {
+        if (file_exists($tapatalk_forum_icon_dir.'default.png'))
+            return $tapatalk_forum_icon_url.'default.png';
+        else if (file_exists($tapatalk_forum_icon_dir.'default.jpg'))
+            return $tapatalk_forum_icon_url.'default.jpg';
+    }
+    
+    return false;
+}
+
+function post_bbcode_clean($str)
+{
+	global $board_url;
+	$array_reg = array(
+		array('reg' => '/\[color=(.*?)\](.*?)\[\/color\]/sei','replace' => "mobi_color_convert('$1','$2' ,false)"),
+		array('reg' => '/\[php\](.*?)\[\/php\]/si','replace' => '[quote]$1[/quote]'),
+		array('reg' => '/\[code\](.*?)\[\/code\]/si','replace' => '[quote]$1[/quote]'),
+		array('reg' => '/\[align=(.*?)\](.*?)\[\/align\]/si',replace=>" $2 "),
+		array('reg' => '/\[email\](.*?)\[\/email\]/si',replace=>"[url]$1[/url]"),
+		
+	);
+	foreach ($array_reg as $arr)
+	{
+		$str = preg_replace($arr['reg'], $arr['replace'], $str);
+	}
+	$str = tt_covert_list($str, '/\[list=1\](.*?)\[\/list\]/si', '2');
+	$str = tt_covert_list($str, '/\[list\](.*?)\[\/list\]/si', '1');
+	return $str;
+}
+
+function mobi_color_convert($color, $str , $is_background)
+{
+    static $colorlist;
+    
+    if (preg_match('/#[\da-fA-F]{6}/is', $color))
+    {
+        if (empty($colorlist))
+        {
+            $colorlist = array(
+                '#000000' => 'Black',             '#708090' => 'SlateGray',       '#C71585' => 'MediumVioletRed', '#FF4500' => 'OrangeRed',
+                '#000080' => 'Navy',              '#778899' => 'LightSlateGrey',  '#CD5C5C' => 'IndianRed',       '#FF6347' => 'Tomato',
+                '#00008B' => 'DarkBlue',          '#778899' => 'LightSlateGray',  '#CD853F' => 'Peru',            '#FF69B4' => 'HotPink',
+                '#0000CD' => 'MediumBlue',        '#7B68EE' => 'MediumSlateBlue', '#D2691E' => 'Chocolate',       '#FF7F50' => 'Coral',
+                '#0000FF' => 'Blue',              '#7CFC00' => 'LawnGreen',       '#D2B48C' => 'Tan',             '#FF8C00' => 'Darkorange',
+                '#006400' => 'DarkGreen',         '#7FFF00' => 'Chartreuse',      '#D3D3D3' => 'LightGrey',       '#FFA07A' => 'LightSalmon',
+                '#008000' => 'Green',             '#7FFFD4' => 'Aquamarine',      '#D3D3D3' => 'LightGray',       '#FFA500' => 'Orange',
+                '#008080' => 'Teal',              '#800000' => 'Maroon',          '#D87093' => 'PaleVioletRed',   '#FFB6C1' => 'LightPink',
+                '#008B8B' => 'DarkCyan',          '#800080' => 'Purple',          '#D8BFD8' => 'Thistle',         '#FFC0CB' => 'Pink',
+                '#00BFFF' => 'DeepSkyBlue',       '#808000' => 'Olive',           '#DA70D6' => 'Orchid',          '#FFD700' => 'Gold',
+                '#00CED1' => 'DarkTurquoise',     '#808080' => 'Grey',            '#DAA520' => 'GoldenRod',       '#FFDAB9' => 'PeachPuff',
+                '#00FA9A' => 'MediumSpringGreen', '#808080' => 'Gray',            '#DC143C' => 'Crimson',         '#FFDEAD' => 'NavajoWhite',
+                '#00FF00' => 'Lime',              '#87CEEB' => 'SkyBlue',         '#DCDCDC' => 'Gainsboro',       '#FFE4B5' => 'Moccasin',
+                '#00FF7F' => 'SpringGreen',       '#87CEFA' => 'LightSkyBlue',    '#DDA0DD' => 'Plum',            '#FFE4C4' => 'Bisque',
+                '#00FFFF' => 'Aqua',              '#8A2BE2' => 'BlueViolet',      '#DEB887' => 'BurlyWood',       '#FFE4E1' => 'MistyRose',
+                '#00FFFF' => 'Cyan',              '#8B0000' => 'DarkRed',         '#E0FFFF' => 'LightCyan',       '#FFEBCD' => 'BlanchedAlmond',
+                '#191970' => 'MidnightBlue',      '#8B008B' => 'DarkMagenta',     '#E6E6FA' => 'Lavender',        '#FFEFD5' => 'PapayaWhip',
+                '#1E90FF' => 'DodgerBlue',        '#8B4513' => 'SaddleBrown',     '#E9967A' => 'DarkSalmon',      '#FFF0F5' => 'LavenderBlush',
+                '#20B2AA' => 'LightSeaGreen',     '#8FBC8F' => 'DarkSeaGreen',    '#EE82EE' => 'Violet',          '#FFF5EE' => 'SeaShell',
+                '#228B22' => 'ForestGreen',       '#90EE90' => 'LightGreen',      '#EEE8AA' => 'PaleGoldenRod',   '#FFF8DC' => 'Cornsilk',
+                '#2E8B57' => 'SeaGreen',          '#9370D8' => 'MediumPurple',    '#F08080' => 'LightCoral',      '#FFFACD' => 'LemonChiffon',
+                '#2F4F4F' => 'DarkSlateGrey',     '#9400D3' => 'DarkViolet',      '#F0E68C' => 'Khaki',           '#FFFAF0' => 'FloralWhite',
+                '#2F4F4F' => 'DarkSlateGray',     '#98FB98' => 'PaleGreen',       '#F0F8FF' => 'AliceBlue',       '#FFFAFA' => 'Snow',
+                '#32CD32' => 'LimeGreen',         '#9932CC' => 'DarkOrchid',      '#F0FFF0' => 'HoneyDew',        '#FFFF00' => 'Yellow',
+                '#3CB371' => 'MediumSeaGreen',    '#9ACD32' => 'YellowGreen',     '#F0FFFF' => 'Azure',           '#FFFFE0' => 'LightYellow',
+                '#40E0D0' => 'Turquoise',         '#A0522D' => 'Sienna',          '#F4A460' => 'SandyBrown',      '#FFFFF0' => 'Ivory',
+                '#4169E1' => 'RoyalBlue',         '#A52A2A' => 'Brown',           '#F5DEB3' => 'Wheat',           '#FFFFFF' => 'White',
+                '#4682B4' => 'SteelBlue',         '#A9A9A9' => 'DarkGrey',        '#F5F5DC' => 'Beige',
+                '#483D8B' => 'DarkSlateBlue',     '#A9A9A9' => 'DarkGray',        '#F5F5F5' => 'WhiteSmoke',
+                '#48D1CC' => 'MediumTurquoise',   '#ADD8E6' => 'LightBlue',       '#F5FFFA' => 'MintCream',
+                '#4B0082' => 'Indigo',            '#ADFF2F' => 'GreenYellow',     '#F8F8FF' => 'GhostWhite',
+                '#556B2F' => 'DarkOliveGreen',    '#AFEEEE' => 'PaleTurquoise',   '#FA8072' => 'Salmon',
+                '#5F9EA0' => 'CadetBlue',         '#B0C4DE' => 'LightSteelBlue',  '#FAEBD7' => 'AntiqueWhite',
+                '#6495ED' => 'CornflowerBlue',    '#B0E0E6' => 'PowderBlue',      '#FAF0E6' => 'Linen',
+                '#66CDAA' => 'MediumAquaMarine',  '#B22222' => 'FireBrick',       '#FAFAD2' => 'LightGoldenRodYellow',
+                '#696969' => 'DimGrey',           '#B8860B' => 'DarkGoldenRod',   '#FDF5E6' => 'OldLace',
+                '#696969' => 'DimGray',           '#BA55D3' => 'MediumOrchid',    '#FF0000' => 'Red',
+                '#6A5ACD' => 'SlateBlue',         '#BC8F8F' => 'RosyBrown',       '#FF00FF' => 'Fuchsia',
+                '#6B8E23' => 'OliveDrab',         '#BDB76B' => 'DarkKhaki',       '#FF00FF' => 'Magenta',
+                '#708090' => 'SlateGrey',         '#C0C0C0' => 'Silver',          '#FF1493' => 'DeepPink',
+            );
+        }
+        
+        if (isset($colorlist[strtoupper($color)])) $color = $colorlist[strtoupper($color)];
+    }
+    if($is_background)
+    	return "[color=$color][b]".$str.'[/b][/color]';
+    else 
+        return "[color=$color]".$str.'[/color]';
+}
+function tt_covert_list($message,$preg,$type)
+{
+	while(preg_match($preg, $message, $blocks))
+    {
+    	$list_str = "";
+    	$list_arr = explode('[*]', $blocks[1]);
+    	foreach ($list_arr as $key => $value)
+    	{
+    		$value = trim($value);
+    		if(!empty($value) && $key != 0)
+    		{
+    			if($type == '1')
+    			{
+    				$key = ' * ';
+    			}
+    			else 
+    			{
+    				$key = $key.'.';
+    			}
+    			$list_str .= $key.$value ."\n";
+    		}
+    		else if(!empty($value))
+    		{
+    			$list_str .= $value ."\n";
+    		}    		
+    	}
+    	$message = str_replace($blocks[0], $list_str, $message);
+    }
+    return $message;
+}
+
+function check_return_user_type($username)
+{
+	global $mybb, $db, $cache;
+	$sql = "SELECT u.uid,g.gid 
+		FROM ".TABLE_PREFIX."users u 
+		LEFT JOIN ".TABLE_PREFIX . "usergroups g
+		ON u.usergroup = g.gid
+		WHERE u.username = '" . $username."'
+		LIMIT 1";
+	$query = $db->query($sql);
+	$is_ban = false;
+	// Read the banned cache
+	$bannedcache = $cache->read("banned");	
+	$user_groups = $db->fetch_array($query);
+	if(empty($user_groups))
+	{
+		return new xmlrpcval(basic_clean('guest'), 'base64');;
+	}	
+	// If the banned cache doesn't exist, update it and re-read it
+	if(!is_array($bannedcache))
+	{
+		$cache->update_banned();
+		$bannedcache = $cache->read("banned");
+	}
+	if(!empty($bannedcache[$user_groups['uid']]) || ($user_groups['gid'] == 7))
+	{
+		$is_ban = true;
+	}
+	if($is_ban)
+	{
+		$user_type = 'banned';
+	}
+	else if($user_groups['gid'] == 4)
+	{
+		$user_type = 'admin';
+	}
+	else if($user_groups['gid'] == 6)
+	{
+		$user_type = 'mod';
+	}
+	else
+    {
+		$user_type = 'normal';
+	}
+	return new xmlrpcval(basic_clean($user_type), 'base64');
+}

@@ -35,7 +35,7 @@ function tapatalk_info()
         "website"       => "http://tapatalk.com",
         "author"        => "Quoord Systems Limited",
         "authorsite"    => "http://tapatalk.com",
-        "version"       => "3.0.0",
+        "version"       => "3.1.0",
         "guid"          => "e7695283efec9a38b54d8656710bf92e",
         "compatibility" => "16*"
     );
@@ -60,7 +60,22 @@ function tapatalk_install()
             )
         ");
     }
-
+    if(!$db->table_exists("tapatalk_push_data"))
+    {
+    	$db->query("
+    		CREATE TABLE " . TABLE_PREFIX . "tapatalk_push_data (
+			  push_id int(10) NOT NULL AUTO_INCREMENT,
+			  author varchar(100) NOT NULL,
+			  user_id int(10) NOT NULL DEFAULT '0',
+			  data_type char(20) NOT NULL DEFAULT '',
+			  title varchar(200) NOT NULL DEFAULT '',
+			  data_id int(10) NOT NULL DEFAULT '0',
+			  create_time int(11) unsigned NOT NULL DEFAULT '0',
+			  PRIMARY KEY (push_id),
+			  KEY user_id (user_id)
+			)
+    	");
+    }
     // Insert settings in to the database
     $query = $db->query("SELECT disporder FROM ".TABLE_PREFIX."settinggroups ORDER BY `disporder` DESC LIMIT 1");
     $disporder = $db->fetch_field($query, 'disporder')+1;
@@ -118,6 +133,12 @@ function tapatalk_install()
             'optionscode'   => "radio\nkeep=Keep Data\ndelete=Delete all data and table",
             'value'         => 'keep'
         ),
+        'push_key' => array(
+        	'title'         => 'Tapatalk push key',
+        	'description'   => 'A push_key to verify your forum push certification, you can fill here with the push key you registered in Tapatalk.com. This is not mandatory but if you enter this key, it will make push feature perfect .',
+        	'optionscode'   => 'text',
+            'value'         => ''
+        ),
     );
 
     $s_index = 0;
@@ -158,6 +179,10 @@ function tapatalk_uninstall()
         if($db->table_exists('tapatalk_users'))
         {
             $db->drop_table('tapatalk_users');
+        }
+    	if($db->table_exists('tapatalk_push_data'))
+        {
+            $db->drop_table('tapatalk_push_data');
         }
     }
 
@@ -288,7 +313,7 @@ function tapatalk_push_reply()
 {
     global $mybb, $db, $tid, $pid, $visible, $thread;
     
-    if ($tid && $pid && $visible == 1 && $mybb->settings['tapatalk_push'] && $db->table_exists('tapatalk_users') && ini_get('allow_url_fopen'))
+    if ($tid && $pid && $visible == 1 && $mybb->settings['tapatalk_push'] && $db->table_exists('tapatalk_users'))
     {
         $query = $db->query("
             SELECT ts.uid
@@ -296,11 +321,13 @@ function tapatalk_push_reply()
             LEFT JOIN ".TABLE_PREFIX."tapatalk_users tu ON (ts.uid=tu.userid)
             WHERE ts.tid = '$tid' AND tu.subscribe=1
         ");
+        
+        $ttp_data = array();
         while($user = $db->fetch_array($query))
         {
             if ($user['uid'] == $mybb->user['uid']) continue;
             
-            $ttp_data = array(
+            $ttp_data[] = array(
                 'userid'    => $user['uid'],
                 'type'      => 'sub',
                 'id'        => $tid,
@@ -309,14 +336,15 @@ function tapatalk_push_reply()
                 'author'    => tt_push_clean($mybb->user['username']),
                 'dateline'  => TIME_NOW,
             );
-            
-            $ttp_post_data = array(
-                'url'  => $mybb->settings['bburl'],
-                'data' => base64_encode(serialize(array($ttp_data))),
-            );
-            
-            $return_status = tt_do_post_request($ttp_post_data);
+            tt_insert_push_data($ttp_data[count($ttp_data)-1]);
         }
+        
+        $ttp_post_data = array(
+            'url'  => $mybb->settings['bburl'],
+            'data' => base64_encode(serialize($ttp_data)),
+        );
+        
+        $return_status = tt_do_post_request($ttp_post_data);
     }
 }
 
@@ -324,7 +352,7 @@ function tapatalk_push_pm()
 {
     global $mybb, $db, $pm, $pminfo;
     
-    if ($pminfo['messagesent'] && $mybb->settings['tapatalk_push'] && $db->table_exists('tapatalk_users') && ini_get('allow_url_fopen'))
+    if ($pminfo['messagesent'] && $mybb->settings['tapatalk_push'] && $db->table_exists('tapatalk_users'))
     {
         $query = $db->query("
             SELECT p.pmid, p.toid
@@ -333,11 +361,12 @@ function tapatalk_push_pm()
             WHERE p.fromid = '{$mybb->user['uid']}' and p.dateline = " . TIME_NOW . " AND p.folder = 1 AND tu.pm=1
         ");
         
+        $ttp_data = array();
         while($user = $db->fetch_array($query))
         {
             if ($user['toid'] == $mybb->user['uid']) continue;
             
-            $ttp_data = array(
+            $ttp_data[] = array(
                 'userid'    => $user['toid'],
                 'type'      => 'pm',
                 'id'        => $user['pmid'],
@@ -345,38 +374,101 @@ function tapatalk_push_pm()
                 'author'    => tt_push_clean($mybb->user['username']),
                 'dateline'  => TIME_NOW,
             );
+            tt_insert_push_data($ttp_data[count($ttp_data)-1]);
+        }
+        $ttp_post_data = array(
+            'url'  => $mybb->settings['bburl'],
+            'data' => base64_encode(serialize($ttp_data)),
+        );
+        
+        $return_status = tt_do_post_request($ttp_post_data);
+    }
+}
+
+function tt_do_post_request($data,$pushTest = false)
+{
+	global $mybb;
+	if(!empty($mybb->settings['tapatalk_push_key']) && !$pushTest)
+	{
+		$data['key'] = $mybb->settings['tapatalk_push_key'];
+	}
+	$push_url = 'http://push.tapatalk.com/push.php';
+    $push_host = 'push.tapatalk.com';
+    $response = 'CURL is disabled and PHP option "allow_url_fopen" is OFF. You can enable CURL or turn on "allow_url_fopen" in php.ini to fix this problem.';
+
+    if (@ini_get('allow_url_fopen'))
+    {
+        if(!$pushTest)
+        {
+            $fp = fsockopen($push_host, 80, $errno, $errstr, 5);
             
-            $ttp_post_data = array(
-                'url'  => $mybb->settings['bburl'],
-                'data' => base64_encode(serialize(array($ttp_data))),
-            );
+            if(!$fp)
+                return false;
+                
+            $data =  http_build_query($data,'', '&');
+            fputs($fp, "POST /push.php HTTP/1.1\r\n");
+            fputs($fp, "Host: $push_host\r\n");
+            fputs($fp, "Content-type: application/x-www-form-urlencoded\r\n");
+            fputs($fp, "Content-length: ". strlen($data) ."\r\n");
+            fputs($fp, "Connection: close\r\n\r\n");
+            fputs($fp, $data);
+            fclose($fp);
+        }
+        else
+        {
+            $params = array('http' => array(
+                'method' => 'POST',
+                'content' => http_build_query($data, '', '&'),
+            ));
+
+            $ctx = stream_context_create($params);
+            $timeout = 10;
+            $old = ini_set('default_socket_timeout', $timeout);
+            $fp = @fopen($push_url, 'rb', false, $ctx);
+
+            if (!$fp) return false;
+
+            ini_set('default_socket_timeout', $old);
+            stream_set_timeout($fp, $timeout);
+            stream_set_blocking($fp, 0); 
             
-            $return_status = tt_do_post_request($ttp_post_data);
+
+            $response = @stream_get_contents($fp);
         }
     }
-}
-
-function tt_do_post_request($data, $optional_headers = null)
-{
-    $url = 'http://push.tapatalk.com/push.php';
-    
-    $params = array('http' => array(
-        'method' => 'POST',
-        'content' => http_build_query($data, '', '&'),
-    ));
-    
-    if ($optional_headers!== null) {
-        $params['http']['header'] = $optional_headers;
+    elseif (function_exists('curl_init'))
+    {
+        $ch = curl_init($push_url);
+        curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+        curl_setopt($ch, CURLOPT_HEADER, false);
+        curl_setopt($ch, CURLOPT_POST, true);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $data);
+        curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 1);
+        curl_setopt($ch, CURLOPT_TIMEOUT,1);
+        $response = curl_exec($ch);
+        curl_close($ch);
     }
     
-    $ctx = stream_context_create($params);
-    $fp = @fopen($url, 'rb', false, $ctx);
-    if (!$fp) return false;
-    $response = @stream_get_contents($fp);
-    
-    return $response;
+	return $response;
 }
 
+function tt_insert_push_data($data)
+{
+	global $mybb,$db;
+	if(!$db->table_exists("tapatalk_push_data"))
+	{
+		return ;
+	}
+	$sql_data = array(
+        'author' => $data['author'],
+		'user_id' => $data['userid'],
+		'data_type' => $data['type'],
+		'title' => $data['title'],
+		'data_id' => $data['subid'],
+		'create_time' => $data['dateline']		
+    );
+	$db->insert_query('tapatalk_push_data', $sql_data);
+}
 function tt_push_clean($str)
 {
     $str = strip_tags($str);
