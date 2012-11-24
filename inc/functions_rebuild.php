@@ -125,7 +125,7 @@ function rebuild_thread_counters($tid)
  		$thread = get_thread($tid); 
  	} 
  		 
- 	$query = $db->simple_select("posts", "COUNT(*) AS replies", "tid='{$tid}' AND pid!='{$thread['firstpost']}' AND visible='1'"); 
+ 	$query = $db->simple_select("posts", "COUNT(*) AS replies", "tid='{$tid}' AND pid !='{$thread['firstpost']}' AND visible='1'"); 
  	$count['replies'] = $db->fetch_field($query, "replies");
 	if($count['replies'] < 0)
 	{
