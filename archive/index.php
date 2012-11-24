@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: index.php 5368 2011-02-17 10:37:01Z MattR $
+ * $Id: index.php 5790 2012-04-19 13:52:50Z Tomm $
  */
 
 define("IN_MYBB", 1);
@@ -97,7 +97,7 @@ switch($action)
 		{
 			if(is_moderator($forum['fid']))
 			{
-				archive_error($lang->sprintf($lang->error_unapproved_thread, $mybb->settings['bburl']."/".get_thread_link($thread['tid'])));
+				archive_error($lang->sprintf($lang->error_unapproved_thread, $mybb->settings['bburl']."/".get_thread_link($thread['tid'], $page)));
 			}
 			else
 			{
@@ -116,7 +116,7 @@ switch($action)
 		build_forum_breadcrumb($forum['fid'], 1);
 		add_breadcrumb($thread['subject']);
 
-		archive_header($thread['subject'], $thread['subject'], $mybb->settings['bburl']."/".get_thread_link($thread['tid']));
+		archive_header($thread['subject'], $thread['subject'], $mybb->settings['bburl']."/".get_thread_link($thread['tid'], $page));
 
 		$plugins->run_hooks("archive_thread_start");
 
@@ -255,12 +255,12 @@ switch($action)
 		// No threads and not a category? Error!
 		if($threadcount < 1 && $forum['type'] != 'c')
 		{
-			archive_header(strip_tags($forum['name']), $forum['name'], $mybb->settings['bburl']."/".get_forum_link($id)."");
+			archive_header(strip_tags($forum['name']), $forum['name'], $mybb->settings['bburl']."/".get_forum_link($id, $page)."");
 			archive_error($lang->error_nothreads);
 		}
 
 		// Build the archive header.
-		archive_header(strip_tags($forum['name']), $forum['name'], $mybb->settings['bburl']."/".get_forum_link($id.""), 1);
+		archive_header(strip_tags($forum['name']), $forum['name'], $mybb->settings['bburl']."/".get_forum_link($id, $page), 1);
 
 		$plugins->run_hooks("archive_forum_start");
 
@@ -324,6 +324,7 @@ switch($action)
 				echo "<ol>\n";
 				while($announcement = $db->fetch_array($query))
 				{
+					$announcement['subject'] = $parser->parse_badwords($announcement['subject']);
 					echo "<li><a href=\"{$base_url}announcement-{$announcement['aid']}.html\">".htmlspecialchars_uni($announcement['subject'])."</a></li>";
 				}
 				echo "</ol>\n</div>\n";

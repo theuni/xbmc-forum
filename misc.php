@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: misc.php 5641 2011-10-26 09:36:44Z Tomm $
+ * $Id: misc.php 5821 2012-05-02 15:40:38Z Tomm $
  */
 
 define("IN_MYBB", 1);
@@ -100,10 +100,13 @@ elseif($mybb->input['action'] == "clearpass")
 {
 	$plugins->run_hooks("misc_clearpass");
 
-	verify_post_check($mybb->input['my_post_key']);
-
 	if($mybb->input['fid'])
 	{
+		if(!verify_post_check($mybb->input['my_post_key']))
+		{
+			error($lang->invalid_post_code);
+		}
+
 		my_unsetcookie("forumpass[".intval($mybb->input['fid'])."]");
 		redirect("index.php", $lang->redirect_forumpasscleared);
 	}
@@ -114,19 +117,20 @@ elseif($mybb->input['action'] == "rules")
 	{
 		$plugins->run_hooks("misc_rules_start");
 
-		$query = $db->simple_select("forums", "*", "fid='".intval($mybb->input['fid'])."' AND active!=0");
-		$forum = $db->fetch_array($query);
+		$fid = intval($mybb->input['fid']);
 
-		$forumpermissions = forum_permissions($forum['fid']);
-
-		if($forum['type'] != "f" || $forum['rules'] == '')
+		$forum = get_forum($fid);
+		if(!$forum || $forum['type'] != "f" || $forum['rules'] == '')
 		{
 			error($lang->error_invalidforum);
 		}
+
+		$forumpermissions = forum_permissions($forum['fid']);
 		if($forumpermissions['canview'] != 1)
 		{
 			error_no_permission();
 		}
+
 		if(!$forum['rulestitle'])
 		{
 			$forum['rulestitle'] = $lang->sprintf($lang->forum_rules, $forum['name']);
@@ -306,7 +310,6 @@ elseif($mybb->input['action'] == "buddypopup")
 	{
 		error_no_permission();
 	}
-
 	if($mybb->input['removebuddy'] && verify_post_check($mybb->input['my_post_key']))
 	{
 		$buddies = $mybb->user['buddylist'];

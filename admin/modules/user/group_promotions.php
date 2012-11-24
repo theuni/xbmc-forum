@@ -1,12 +1,12 @@
 <?php
 /**
  * MyBB 1.6
- * Copyright � 2010 MyBB Group, All Rights Reserved
+ * Copyright 2010 MyBB Group, All Rights Reserved
  *
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: group_promotions.php 5297 2010-12-28 22:01:14Z Tomm $
+ * $Id: group_promotions.php 5832 2012-05-24 08:08:19Z Tomm $
  */
 
 // Disallow direct access to this file for security reasons
@@ -51,7 +51,7 @@ if($mybb->input['action'] == "disable")
 		flash_message($lang->error_no_promo_id, 'error');
 		admin_redirect("index.php?module=user-group_promotions");
 	}
-	
+
 	$query = $db->simple_select("promotions", "*", "pid='".intval($mybb->input['pid'])."'");
 	$promotion = $db->fetch_array($query);
 
@@ -675,5 +675,4 @@ if(!$mybb->input['action'])
 	
 	$page->output_footer();
 }
-
 ?>

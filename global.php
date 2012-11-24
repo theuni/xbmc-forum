@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: global.php 5640 2011-10-26 09:22:59Z Tomm $
+ * $Id: global.php 5793 2012-04-19 14:27:33Z Tomm $
  */
 
 $working_dir = dirname(__FILE__);
@@ -241,7 +241,7 @@ foreach($stylesheet_scripts as $stylesheet_script)
 }
 
 // Are we linking to a remote theme server?
-if(substr($theme['imgdir'], 0, 7) == "http://")
+if(substr($theme['imgdir'], 0, 7) == "http://" || substr($theme['imgdir'], 0, 8) == "https://")
 {
 	// If a language directory for the current language exists within the theme - we use it
 	if(!empty($mybb->user['language']))
@@ -356,6 +356,21 @@ if($mybb->user['uid'] != 0)
 // Otherwise, we have a guest
 else
 {
+	switch($mybb->settings['username_method'])
+	{
+		case 0:
+			$login_username = $lang->login_username;
+			break;
+		case 1:
+			$login_username = $lang->login_username1;
+			break;
+		case 2:
+			$login_username = $lang->login_username2;
+			break;
+		default:
+			$login_username = $lang->login_username;
+			break;
+	}
 	eval("\$welcomeblock = \"".$templates->get("header_welcomeblock_guest")."\";");
 }
 
@@ -466,6 +481,12 @@ $lang->ajax_loading = str_replace("'", "\\'", $lang->ajax_loading);
 // Check if this user has a new private message.
 if($mybb->user['pmnotice'] == 2 && $mybb->user['pms_unread'] > 0 && $mybb->settings['enablepms'] != 0 && $mybb->usergroup['canusepms'] != 0 && $mybb->usergroup['canview'] != 0 && ($current_page != "private.php" || $mybb->input['action'] != "read"))
 {
+	if(!$parser)
+	{
+		require_once MYBB_ROOT.'inc/class_parser.php';
+		$parser = new postParser;
+	}
+
 	$query = $db->query("
 		SELECT pm.subject, pm.pmid, fu.username AS fromusername, fu.uid AS fromuid
 		FROM ".TABLE_PREFIX."privatemessages pm
@@ -474,7 +495,9 @@ if($mybb->user['pmnotice'] == 2 && $mybb->user['pms_unread'] > 0 && $mybb->setti
 		ORDER BY pm.dateline DESC
 		LIMIT 1
 	");
+
 	$pm = $db->fetch_array($query);
+	$pm['subject'] = $parser->parse_badwords($pm['subject']);
 	
 	if($pm['fromuid'] == 0)
 	{

@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: modcp.php 5585 2011-09-13 13:14:41Z Tomm $
+ * $Id: modcp.php 5821 2012-05-02 15:40:38Z Tomm $
  */
 
 define("IN_MYBB", 1);
@@ -69,6 +69,18 @@ else
 	$flist = $tflist = '';
 }
 
+// Retrieve a list of unviewable forums
+$unviewableforums = get_unviewable_forums();
+
+if($unviewableforums && !is_super_admin($mybb->user['uid']))
+{
+	$flist .= " AND fid NOT IN ({$unviewableforums})";
+	$tflist .= " AND t.fid NOT IN ({$unviewableforums})";
+
+	$unviewableforums = str_replace("'", '', $unviewableforums);
+	$unviewableforums = explode(',', $unviewableforums);
+}
+
 // Fetch the Mod CP menu
 eval("\$modcp_nav = \"".$templates->get("modcp_nav")."\";");
 
@@ -87,13 +99,19 @@ if($mybb->input['action'] == "do_reports")
 		error($lang->error_noselected_reports);
 	}
 
-	$mybb->input['reports'] = array_map("intval", $mybb->input['reports']);
-	$rids = implode($mybb->input['reports'], "','");
-	$rids = "'0','{$rids}'";
+	$sql = '1=1';
+	if(!$mybb->input['allbox'])
+	{
+		$mybb->input['reports'] = array_map("intval", $mybb->input['reports']);
+		$rids = implode($mybb->input['reports'], "','");
+		$rids = "'0','{$rids}'";
+
+		$sql = "rid IN ({$rids})";
+	}
 
 	$plugins->run_hooks("modcp_do_reports");
 
-	$db->update_query("reportedposts", array('reportstatus' => 1), "rid IN ({$rids}){$flist}");
+	$db->update_query("reportedposts", array('reportstatus' => 1), "{$sql}{$flist}");
 	$cache->update_reportedposts();
 	
 	$page = intval($mybb->input['page']);
@@ -186,28 +204,34 @@ if($mybb->input['action'] == "reports")
 		ORDER BY r.dateline DESC
 		LIMIT {$start}, {$perpage}
 	");
-	while($report = $db->fetch_array($query))
-	{
-		$trow = alt_trow();
-		if(is_moderator($report['fid']))
-		{
-			$trow = 'trow_shaded';
-		}
-		$report['postlink'] = get_post_link($report['pid'], $report['tid']);
-		$report['threadlink'] = get_thread_link($report['tid']);
-		$report['posterlink'] = get_profile_link($report['postuid']);
-		$report['reporterlink'] = get_profile_link($report['uid']);
-		$reportdate = my_date($mybb->settings['dateformat'], $report['dateline']);
-		$reporttime = my_date($mybb->settings['timeformat'], $report['dateline']);
-		$report['threadsubject'] = htmlspecialchars_uni($parser->parse_badwords($report['threadsubject']));
-		eval("\$reports .= \"".$templates->get("modcp_reports_report")."\";");
-	}
-	if(!$reports)
+
+	if(!$db->num_rows($query))
 	{
 		eval("\$reports = \"".$templates->get("modcp_reports_noreports")."\";");
 	}
+	else
+	{
+		while($report = $db->fetch_array($query))
+		{
+			$trow = alt_trow();
+			if(is_moderator($report['fid']))
+			{
+				$trow = 'trow_shaded';
+			}
 
-	$plugins->run_hooks("modcp_reports");
+			$report['postlink'] = get_post_link($report['pid'], $report['tid']);
+			$report['threadlink'] = get_thread_link($report['tid']);
+			$report['posterlink'] = get_profile_link($report['postuid']);
+			$report['reporterlink'] = get_profile_link($report['uid']);
+			$reportdate = my_date($mybb->settings['dateformat'], $report['dateline']);
+			$reporttime = my_date($mybb->settings['timeformat'], $report['dateline']);
+			$report['threadsubject'] = htmlspecialchars_uni($parser->parse_badwords($report['threadsubject']));
+
+			eval("\$reports .= \"".$templates->get("modcp_reports_report")."\";");
+		}
+	}
+
+	$plugins->run_hooks("modcp_reports_end");
 
 	eval("\$reportedposts = \"".$templates->get("modcp_reports")."\";");
 	output_page($reportedposts);
@@ -276,16 +300,9 @@ if($mybb->input['action'] == "allreports")
 	{
 		eval("\$allreportspages = \"".$templates->get("modcp_reports_multipage")."\";");
 	}
-
-	$query = $db->simple_select("forums", "fid, name");
-	while($forum = $db->fetch_array($query))
-	{
-		$forums[$forum['fid']] = $forum['name'];
-	}
 	
 	$plugins->run_hooks("modcp_allreports_start");
 
-	$reports = '';
 	$query = $db->query("
 		SELECT r.*, u.username, up.username AS postusername, up.uid AS postuid, t.subject AS threadsubject
 		FROM ".TABLE_PREFIX."reportedposts r
@@ -294,48 +311,46 @@ if($mybb->input['action'] == "allreports")
 		LEFT JOIN ".TABLE_PREFIX."users u ON (r.uid=u.uid)
 		LEFT JOIN ".TABLE_PREFIX."users up ON (p.uid=up.uid)
 		ORDER BY r.dateline DESC
-		LIMIT $start, $perpage
+		LIMIT {$start}, {$perpage}
 	");
-	while($report = $db->fetch_array($query))
-	{
-		$report['postlink'] = get_post_link($report['pid'], $report['tid']);
-		$report['threadlink'] = get_thread_link($report['tid']);
-		$report['posterlink'] = get_profile_link($report['postuid']);
-		$report['reporterlink'] = get_profile_link($report['uid']);
 
-		$reportdate = my_date($mybb->settings['dateformat'], $report['dateline']);
-		$reporttime = my_date($mybb->settings['timeformat'], $report['dateline']);
-
-		if($report['reportstatus'] == 0)
-		{
-			$trow = "trow_shaded";
-		}
-		else
-		{
-			$trow = alt_trow();
-		}
-
-		$report['postusername'] = build_profile_link($report['postusername'], $report['postuid']);
-
-		if($report['threadsubject'])
-		{
-			$report['threadsubject'] = htmlspecialchars_uni($parser->parse_badwords($report['threadsubject']));
-			$report['threadsubject'] = "<a href=\"".get_thread_link($report['tid'])."\" target=\"_blank\">{$report['threadsubject']}</a>";
-		}
-		else
-		{
-			$report['threadsubject'] = $lang->na;
-		}
-
-		eval("\$allreports .= \"".$templates->get("modcp_reports_allreport")."\";");
-	}
-
-	if(!$allreports)
+	$allreports = '';
+	if(!$db->num_rows($query))
 	{
 		eval("\$allreports = \"".$templates->get("modcp_reports_allnoreports")."\";");
 	}
+	else
+	{
+		while($report = $db->fetch_array($query))
+		{
+			$trow = alt_trow();
+			$report['threadsubject'] = $lang->na;
+			$report['threadlink'] = get_thread_link($report['tid']);
 
-	$plugins->run_hooks("modcp_reports");
+			$report['posterlink'] = get_profile_link($report['postuid']);
+			$report['postlink'] = get_post_link($report['pid'], $report['tid']);
+			$report['postusername'] = build_profile_link($report['postusername'], $report['postuid']);
+			$report['reporterlink'] = get_profile_link($report['uid']);
+
+			$reportdate = my_date($mybb->settings['dateformat'], $report['dateline']);
+			$reporttime = my_date($mybb->settings['timeformat'], $report['dateline']);
+
+			if($report['reportstatus'] == 0)
+			{
+				$trow = "trow_shaded";
+			}
+	
+			if($report['threadsubject'])
+			{
+				$report['threadsubject'] = htmlspecialchars_uni($parser->parse_badwords($report['threadsubject']));
+				$report['threadsubject'] = "<a href=\"".get_thread_link($report['tid'])."\" target=\"_blank\">{$report['threadsubject']}</a>";
+			}
+
+			eval("\$allreports .= \"".$templates->get("modcp_reports_allreport")."\";");
+		}
+	}
+
+	$plugins->run_hooks("modcp_allreports_end");
 
 	eval("\$allreportedposts = \"".$templates->get("modcp_reports_allreports")."\";");
 	output_page($allreportedposts);
@@ -528,7 +543,7 @@ if($mybb->input['action'] == "do_delete_announcement")
 	{
 		error($lang->error_invalid_announcement);
 	}
-	if(($mybb->usergroup['issupermod'] != 1 && $announcement['fid'] == -1) || ($announcement['fid'] != -1 && !is_moderator($announcement['fid'])))
+	if(($mybb->usergroup['issupermod'] != 1 && $announcement['fid'] == -1) || ($announcement['fid'] != -1 && !is_moderator($announcement['fid'])) || ($unviewableforums && in_array($announcement['fid'], $unviewableforums)))
 	{
 		error_no_permission();
 	}
@@ -553,7 +568,8 @@ if($mybb->input['action'] == "delete_announcement")
 	{
 		error($lang->error_invalid_announcement);
 	}
-	if(($mybb->usergroup['issupermod'] != 1 && $announcement['fid'] == -1) || ($announcement['fid'] != -1 && !is_moderator($announcement['fid'])))
+
+	if(($mybb->usergroup['issupermod'] != 1 && $announcement['fid'] == -1) || ($announcement['fid'] != -1 && !is_moderator($announcement['fid'])) || ($unviewableforums && in_array($announcement['fid'], $unviewableforums)))
 	{
 		error_no_permission();
 	}
@@ -569,7 +585,7 @@ if($mybb->input['action'] == "do_new_announcement")
 	verify_post_check($mybb->input['my_post_key']);
 
 	$announcement_fid = intval($mybb->input['fid']);
-	if(($mybb->usergroup['issupermod'] != 1 && $announcement_fid == -1) || ($announcement_fid != -1 && !is_moderator($announcement_fid)))
+	if(($mybb->usergroup['issupermod'] != 1 && $announcement_fid == -1) || ($announcement_fid != -1 && !is_moderator($announcement_fid)) || ($unviewableforums && in_array($announcement['fid'], $unviewableforums)))
 	{
 		error_no_permission();
 	}
@@ -682,7 +698,7 @@ if($mybb->input['action'] == "new_announcement")
 
 	$announcement_fid = intval($mybb->input['fid']);
 
-	if(($mybb->usergroup['issupermod'] != 1 && $announcement_fid == -1) || ($announcement_fid != -1 && !is_moderator($announcement_fid)))
+	if(($mybb->usergroup['issupermod'] != 1 && $announcement_fid == -1) || ($announcement_fid != -1 && !is_moderator($announcement_fid)) || ($unviewableforums && in_array($announcement['fid'], $unviewableforums)))
 	{
 		error_no_permission();
 	}
@@ -848,7 +864,7 @@ if($mybb->input['action'] == "do_edit_announcement")
 	}
 
 	// Mod has permissions to edit this announcement
-	if(($mybb->usergroup['issupermod'] != 1 && $announcement['fid'] == -1) || ($announcement['fid'] != -1 && !is_moderator($announcement['fid'])))
+	if(($mybb->usergroup['issupermod'] != 1 && $announcement['fid'] == -1) || ($announcement['fid'] != -1 && !is_moderator($announcement['fid'])) || ($unviewableforums && in_array($announcement['fid'], $unviewableforums)))
 	{
 		error_no_permission();
 	}
@@ -970,9 +986,29 @@ if($mybb->input['action'] == "edit_announcement")
 	{
 		error($lang->error_invalid_announcement);
 	}
-	if(($mybb->usergroup['issupermod'] != 1 && $announcement['fid'] == -1) || ($announcement['fid'] != -1 && !is_moderator($announcement['fid'])))
+	if(($mybb->usergroup['issupermod'] != 1 && $announcement['fid'] == -1) || ($announcement['fid'] != -1 && !is_moderator($announcement['fid'])) || ($unviewableforums && in_array($announcement['fid'], $unviewableforums)))
 	{
 		error_no_permission();
+	}
+
+	if(!$announcement['startdate'])
+	{
+		// No start date? Make it now.
+		$announcement['startdate'] = TIME_NOW;
+	}
+
+	$makeshift_end = false;
+	if(!$announcement['enddate'])
+	{
+		$makeshift_end = true;
+		$makeshift_time = TIME_NOW;
+		if($announcement['startdate'])
+		{
+			$makeshift_time = $announcement['startdate'];
+		}
+
+		// No end date? Make it a year from now.
+		$announcement['enddate'] = $makeshift_time + (60 * 60 * 24 * 366);
 	}
 
 	// Deal with inline errors
@@ -1109,7 +1145,7 @@ if($mybb->input['action'] == "edit_announcement")
 		$smilies_sel['no'] = ' checked="checked"';
 	}
 
-	if(($errored && $mybb->input['endtime_type'] == 2) || (!$errored && intval($announcement['enddate']) == 0))
+	if(($errored && $mybb->input['endtime_type'] == 2) || (!$errored && intval($announcement['enddate']) == 0) || $makeshift_end == true)
 	{
 		$end_type_sel['infinite'] = ' checked="checked"';
 	}
@@ -1154,11 +1190,11 @@ if($mybb->input['action'] == "announcements")
 				$trow = alt_trow();
 				if($announcement['startdate'] > TIME_NOW || ($announcement['enddate'] < TIME_NOW && $announcement['enddate'] != 0))
 				{
-					$icon = "<img src=\"images/minioff.gif\" alt=\"({$lang->expired})\" title=\"{$lang->expired_announcement}\"  style=\"vertical-align: middle;\" /> ";
+					$icon = "<img src=\"{$theme['imgdir']}/minioff.gif\" alt=\"({$lang->expired})\" title=\"{$lang->expired_announcement}\"  style=\"vertical-align: middle;\" /> ";
 				}
 				else
 				{
-					$icon = "<img src=\"images/minion.gif\" alt=\"({$lang->active})\" title=\"{$lang->active_announcement}\"  style=\"vertical-align: middle;\" /> ";
+					$icon = "<img src=\"{$theme['imgdir']}/minion.gif\" alt=\"({$lang->active})\" title=\"{$lang->active_announcement}\"  style=\"vertical-align: middle;\" /> ";
 				}
 
 				$subject = htmlspecialchars_uni($announcement['subject']);
@@ -2470,22 +2506,32 @@ if($mybb->input['action'] == "ipsearch")
 			else
 			{
 				$ip_range = fetch_longipv4_range($mybb->input['ipaddress']);
-				if(!is_array($ip_range))
+				
+				if($ip_range)
 				{
-					$post_ip_sql = "longipaddress='{$ip_range}'";
-				}
-				else
-				{
-					$post_ip_sql = "longipaddress > '{$ip_range[0]}' AND longipaddress < '{$ip_range[1]}'";
+					if(!is_array($ip_range))
+					{
+						$post_ip_sql = "longipaddress='{$ip_range}'";
+					}
+					else
+					{
+						$post_ip_sql = "longipaddress > '{$ip_range[0]}' AND longipaddress < '{$ip_range[1]}'";
+					}
 				}
 			}
+
 			$plugins->run_hooks("modcp_ipsearch_posts_start");
-			$query = $db->query("
-				SELECT COUNT(pid) AS count
-				FROM ".TABLE_PREFIX."posts
-				WHERE {$post_ip_sql}
-			");
-			$post_results = $db->fetch_field($query, "count");
+
+			if($post_ip_sql)
+			{
+				$query = $db->query("
+					SELECT COUNT(pid) AS count
+					FROM ".TABLE_PREFIX."posts
+					WHERE {$post_ip_sql}
+				");
+
+				$post_results = $db->fetch_field($query, "count");
+			}
 		}
 
 		// Searching user IP addresses
@@ -2499,25 +2545,40 @@ if($mybb->input['action'] == "ipsearch")
 			else
 			{
 				$ip_range = fetch_longipv4_range($mybb->input['ipaddress']);
-				if(!is_array($ip_range))
+
+				if($ip_range)
 				{
-					$user_ip_sql = "longregip='{$ip_range}' OR longlastip='{$ip_range}'";
-				}
-				else
-				{
-					$user_ip_sql = "(longregip > '{$ip_range[0]}' AND longregip < '{$ip_range[1]}') OR (longlastip > '{$ip_range[0]}' AND longlastip < '{$ip_range[1]}')";
+					if(!is_array($ip_range))
+					{
+						$user_ip_sql = "longregip='{$ip_range}' OR longlastip='{$ip_range}'";
+					}
+					else
+					{
+						$user_ip_sql = "(longregip > '{$ip_range[0]}' AND longregip < '{$ip_range[1]}') OR (longlastip > '{$ip_range[0]}' AND longlastip < '{$ip_range[1]}')";
+					}
 				}
 			}
+
 			$plugins->run_hooks("modcp_ipsearch_users_start");
-			$query = $db->query("
-				SELECT COUNT(uid) AS count
-				FROM ".TABLE_PREFIX."users
-				WHERE {$user_ip_sql}
-			");
-			$user_results = $db->fetch_field($query, "count");
+
+			if($user_ip_sql)
+			{
+				$query = $db->query("
+					SELECT COUNT(uid) AS count
+					FROM ".TABLE_PREFIX."users
+					WHERE {$user_ip_sql}
+				");
+
+				$user_results = $db->fetch_field($query, "count");
+			}
 		}
 
 		$total_results = $post_results+$user_results;
+
+		if(!$total_results)
+		{
+			$total_results = 1;
+		}
 
 		// Now we have the result counts, paginate
 		$perpage = intval($mybb->input['perpage']);
@@ -2564,7 +2625,7 @@ if($mybb->input['action'] == "ipsearch")
 		$multipage = multipage($total_results, $perpage, $page, $page_url);
 
 		$post_limit = $perpage;
-		if($mybb->input['search_users'] && $start <= $user_results)
+		if($mybb->input['search_users'] && $user_results && $start <= $user_results)
 		{
 			$query = $db->query("
 				SELECT username, uid, regip, lastip
@@ -2611,7 +2672,7 @@ if($mybb->input['action'] == "ipsearch")
 				$post_start = 0;
 			}
 		}
-		if($mybb->input['search_posts'] && (!$mybb->input['search_users'] || ($mybb->input['search_users'] && $post_limit > 0)))
+		if($mybb->input['search_posts'] && $post_results && (!$mybb->input['search_users'] || ($mybb->input['search_users'] && $post_limit > 0)))
 		{
 			$ipaddresses = $tids = $uids = array();
 			$query = $db->query("
@@ -2675,7 +2736,7 @@ if($mybb->input['action'] == "ipsearch")
 		
 		if(!strstr($mybb->input['ipaddress'], "*") && !strstr($mybb->input['ipaddress'], ":"))
 		{
-			$misc_info_link = "<div class=\"float_right\">(<a href=\"modcp.php?action=iplookup&ipaddress=".htmlspecialchars_uni($mybb->input['ipaddress'])."\" onclick=\"MyBB.popupWindow('{$mybb->settings['bburl']}/modcp.php?action=iplookup&ipaddress=".htmlspecialchars_uni($mybb->input['ipaddress'])."', 'iplookup', 500, 250); return false;\">{$lang->info_on_ip}</a>)</div>";
+			$misc_info_link = "<div class=\"float_right\">(<a href=\"modcp.php?action=iplookup&ipaddress=".htmlspecialchars_uni($mybb->input['ipaddress'])."\" onclick=\"MyBB.popupWindow('{$mybb->settings['bburl']}/modcp.php?action=iplookup&ipaddress=".urlencode($mybb->input['ipaddress'])."', 'iplookup', 500, 250); return false;\">{$lang->info_on_ip}</a>)</div>";
 		}
 
 		eval("\$ipsearch_results = \"".$templates->get("modcp_ipsearch_results")."\";");
@@ -2890,6 +2951,9 @@ if($mybb->input['action'] == "liftban")
 	
 	$plugins->run_hooks("modcp_liftban_start");
 
+	$query = $db->simple_select("users", "username", "uid = '{$ban['uid']}'");
+	$username = $db->fetch_field($query, "username");
+
 	$updated_group = array(
 		'usergroup' => $ban['oldgroup'],
 		'additionalgroups' => $ban['oldadditionalgroups'],
@@ -2900,6 +2964,7 @@ if($mybb->input['action'] == "liftban")
 
 	$cache->update_banned();
 	$cache->update_moderators();
+	log_moderator_action(array("uid" => $ban['uid'], "username" => $username), $lang->lifted_ban);
 	
 	$plugins->run_hooks("modcp_liftban_end");
 
@@ -2937,7 +3002,7 @@ if($mybb->input['action'] == "do_banuser" && $mybb->request_method == "post")
 	else
 	{
 		// Get the users info from their Username
-		$query = $db->simple_select("users", "uid, usergroup, additionalgroups, displaygroup", "username = '".$db->escape_string($mybb->input['username'])."'", array('limit' => 1));
+		$query = $db->simple_select("users", "uid, username, usergroup, additionalgroups, displaygroup", "username = '".$db->escape_string($mybb->input['username'])."'", array('limit' => 1));
 		$user = $db->fetch_array($query);
 		if(!$user['uid'])
 		{
@@ -3034,6 +3099,7 @@ if($mybb->input['action'] == "do_banuser" && $mybb->request_method == "post")
 		$db->update_query('users', $update_array, "uid = {$user['uid']}");
 
 		$cache->update_banned();
+		log_moderator_action(array("uid" => $user['uid'], "username" => $user['username']), $lang->banned_user);
 		
 		$plugins->run_hooks("modcp_do_banuser_end");
 
@@ -3273,6 +3339,12 @@ if(!$mybb->input['action'])
 		$latest_thread = "<span style=\"text-align: center;\">{$lang->lastpost_never}</span>";
 	}
 
+	$where = '';
+	if($tflist)
+	{
+		$where = "WHERE (t.fid <> 0 {$tflist}) OR (!l.fid)";
+	}
+
 	$query = $db->query("
 		SELECT l.*, u.username, u.usergroup, u.displaygroup, t.subject AS tsubject, f.name AS fname, p.subject AS psubject
 		FROM ".TABLE_PREFIX."moderatorlog l
@@ -3280,9 +3352,11 @@ if(!$mybb->input['action'])
 		LEFT JOIN ".TABLE_PREFIX."threads t ON (t.tid=l.tid)
 		LEFT JOIN ".TABLE_PREFIX."forums f ON (f.fid=l.fid)
 		LEFT JOIN ".TABLE_PREFIX."posts p ON (p.pid=l.pid)
+		{$where}
 		ORDER BY l.dateline DESC
 		LIMIT 5
 	");
+
 	while($logitem = $db->fetch_array($query))
 	{
 		$information = '';
@@ -3408,5 +3482,4 @@ if(!$mybb->input['action'])
 	eval("\$modcp = \"".$templates->get("modcp")."\";");
 	output_page($modcp);
 }
-
 ?>

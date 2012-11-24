@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: hello.php 5297 2010-12-28 22:01:14Z Tomm $
+ * $Id: hello.php 5754 2012-03-09 14:58:03Z Tomm $
  */
  
 // Disallow direct access to this file for security reasons
@@ -104,7 +104,7 @@ function hello_world($page)
 	return $page;
 }
 
-function hello_world_postbit($post)
+function hello_world_postbit(&$post)
 {
 	$post['message'] = "<strong>Hello world!</strong><br /><br />{$post['message']}";
 }

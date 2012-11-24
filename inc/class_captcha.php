@@ -31,7 +31,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  *
- * $Id: class_captcha.php 5605 2011-09-19 11:17:26Z Tomm $
+ * $Id: class_captcha.php 5772 2012-04-19 09:47:45Z Tomm $
  */
 
 class captcha
@@ -312,7 +312,19 @@ class captcha
 		foreach($this->errors as $error)
 		{
 			$lang_string = $error['error_code'];
-			
+
+			if(!$lang_string)
+			{
+				if($lang->invalid_captcha_verify)
+				{
+					$lang_string = 'invalid_captcha_verify';
+				}
+				else
+				{
+					$lang_string = 'unknown_error';
+				}
+			}
+
 			if(!$lang->$lang_string)
 			{
 				$errors[] = $error['error_code'];

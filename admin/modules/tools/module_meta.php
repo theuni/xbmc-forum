@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: module_meta.php 5620 2011-09-26 18:23:52Z ralgith $
+ * $Id: module_meta.php 5817 2012-04-23 15:54:10Z Tomm $
  */
 
 // Disallow direct access to this file for security reasons
@@ -113,7 +113,7 @@ function tools_admin_permissions()
 		"statistics" => $lang->can_view_statistics,
 	);
 	
-	$plugins->run_hooks("admin_tools_permissions", $admin_permissions);
+	$admin_permissions = $plugins->run_hooks("admin_tools_permissions", $admin_permissions);
 	
 	return array("name" => $lang->tools_and_maintenance, "permissions" => $admin_permissions, "disporder" => 50);
 }

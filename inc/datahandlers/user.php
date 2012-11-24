@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: user.php 5625 2011-10-02 19:16:35Z ralgith $
+ * $Id: user.php 5828 2012-05-08 16:06:16Z Tomm $
  */
 
 // Disallow direct access to this file for security reasons
@@ -527,6 +527,11 @@ class UserDataHandler extends DataHandler
 			}
 			else
 			{
+				if($profilefield['maxlength'] > 0 && my_strlen($profile_fields[$field]) > $profilefield['maxlength'])
+				{
+					$this->set_error('max_limit_reached', array($profilefield['name'], $profilefield['maxlength']));
+				}
+
 				$options = $db->escape_string($profile_fields[$field]);
 			}
 			$user['user_fields'][$field] = $options;
@@ -925,7 +930,7 @@ class UserDataHandler extends DataHandler
 			$this->verify_checkfields();
 		}
 		
-		$plugins->run_hooks_by_ref("datahandler_user_validate", $this);
+		$plugins->run_hooks("datahandler_user_validate", $this);
 		
 		// We are done validating, return.
 		$this->set_validated(true);
@@ -1036,7 +1041,7 @@ class UserDataHandler extends DataHandler
 			$this->user_insert_data['dst'] = 0;
 		}
 
-		$plugins->run_hooks_by_ref("datahandler_user_insert", $this);
+		$plugins->run_hooks("datahandler_user_insert", $this);
 		
 		$this->uid = $db->insert_query("users", $this->user_insert_data);
 		
@@ -1240,7 +1245,7 @@ class UserDataHandler extends DataHandler
 			unset($this->user_update_data['pmnotice']);
 		}
 		
-		$plugins->run_hooks_by_ref("datahandler_user_update", $this);
+		$plugins->run_hooks("datahandler_user_update", $this);
 		
 		if(count($this->user_update_data) < 1 && empty($user['user_fields']))
 		{ 
@@ -1254,7 +1259,7 @@ class UserDataHandler extends DataHandler
 		}
 		
 		$cache->update_moderators();
-		if(isset($user['bday']))
+		if(isset($user['bday']) || isset($user['username']))
 		{
 			$cache->update_birthdays();
 		}

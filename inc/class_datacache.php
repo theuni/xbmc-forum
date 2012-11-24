@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: class_datacache.php 5473 2011-06-23 11:12:10Z Tomm $
+ * $Id: class_datacache.php 5828 2012-05-08 16:06:16Z Tomm $
  */
 
 class datacache
@@ -95,7 +95,7 @@ class datacache
 	function read($name, $hard=false)
 	{
 		global $db, $mybb;
-		
+
 		// Already have this cache and we're not doing a hard refresh? Return cached copy
 		if(isset($this->cache[$name]) && $hard == false)
 		{
@@ -111,7 +111,7 @@ class datacache
 		if(is_object($this->handler))
 		{
 			$data = $this->handler->fetch($name);
-			
+
 			// No data returned - cache gone bad?
 			if($data === false)
 			{
@@ -119,21 +119,17 @@ class datacache
 				$query = $db->simple_select("datacache", "title,cache", "title='".$db->escape_string($name)."'");
 				$cache_data = $db->fetch_array($query);
 				$data = @unserialize($cache_data['cache']);
-				
-				if($data == null)
-				{
-					$data = '';
-				}
-				
+
 				// Update cache for handler
 				$this->handler->put($name, $data);
 			}
-		}		
+		}
 		// Else, using internal database cache
 		else
 		{
 			$query = $db->simple_select("datacache", "title,cache", "title='$name'");
 			$cache_data = $db->fetch_array($query);
+
 			if(!$cache_data['title'])
 			{
 				$data = false;

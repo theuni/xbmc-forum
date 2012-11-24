@@ -3,7 +3,7 @@
  * MyBB 1.6 English Language Pack
  * Copyright 2010 MyBB Group, All Rights Reserved
  *
- * $Id: modcp.lang.php 5557 2011-08-26 14:06:44Z huji $
+ * $Id: modcp.lang.php 5828 2012-05-08 16:06:16Z Tomm $
  */
 
 $l['nav_width'] = "180";
@@ -185,6 +185,8 @@ $l['multi_approve_threads'] = "Selected Threads Approved";
 $l['multi_delete_threads'] = "Selected Threads Deleted";
 $l['edited_user'] = "Edited User's Profile";
 $l['edited_user_info'] = "<strong>User:</strong> <a href=\"{2}\">{1}</a>";
+$l['banned_user'] = "Banned User";
+$l['lifted_ban'] = "Lifted User Ban";
 
 $l['warning_logs'] = "Warning Logs";
 $l['warned_user'] = "Warned User";

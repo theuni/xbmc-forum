@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: editpost.php 5568 2011-09-08 10:13:10Z Tomm $
+ * $Id: editpost.php 5746 2012-02-03 10:03:25Z Tomm $
  */
 
 define("IN_MYBB", 1);

@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: class_form.php 5624 2011-10-02 19:07:56Z ralgith $
+ * $Id: class_form.php 5828 2012-05-08 16:06:16Z Tomm $
  */
 
 /**
@@ -800,7 +800,7 @@ class DefaultForm
 	function end()
 	{
 		global $plugins;
-		$plugins->run_hooks_by_ref("admin_form_end", $this);
+		$plugins->run_hooks("admin_form_end", $this);
 		if($this->_return == false)
 		{
 			echo "</form>";

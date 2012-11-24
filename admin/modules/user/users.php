@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: users.php 5646 2011-10-31 10:32:20Z PirataNervo $
+ * $Id: users.php 5803 2012-04-20 08:35:26Z Tomm $
  */
 
 // Disallow direct access to this file for security reasons
@@ -159,7 +159,7 @@ if($mybb->input['action'] == "avatar_gallery")
 	// We've selected a new avatar for this user!
 	if($mybb->input['avatar'])
 	{
-		if(!verify_post_check($mybb->input['my_post_key']))
+	if(!verify_post_check($mybb->input['my_post_key']))
 		{
 			echo $lang->invalid_post_verify_key2;
 			exit;
@@ -623,6 +623,11 @@ if($mybb->input['action'] == "edit")
 			"aim" => $mybb->input['aim'],
 			"yahoo" => $mybb->input['yahoo'],
 			"msn" => $mybb->input['msn'],
+			"birthday" => array(
+				"day" => $mybb->input['bday1'],
+				"month" => $mybb->input['bday2'],
+				"year" => $mybb->input['bday3']
+			),
 			"style" => $mybb->input['style'],
 			"signature" => $mybb->input['signature'],
 			"dateformat" => intval($mybb->input['dateformat']),
@@ -908,6 +913,22 @@ if($mybb->input['action'] == "edit")
 		$mybb->input['profile_fields'] = $db->fetch_array($query);
 	}
 
+	if($mybb->input['bday1'] || $mybb->input['bday2'] || $mybb->input['bday3'])
+	{
+		$mybb->input['bday'][0] = $mybb->input['bday1'];
+		$mybb->input['bday'][1] = $mybb->input['bday2'];
+		$mybb->input['bday'][2] = intval($mybb->input['bday3']);
+	}
+	else
+	{
+		$mybb->input['bday'] = array();
+
+		if($user['birthday'])
+		{
+			$mybb->input['bday'] = explode('-', $user['birthday']);
+		}
+	}
+
 	// Fetch custom profile fields
 	$query = $db->simple_select("profilefields", "*", "", array('order_by' => 'disporder'));
 	while($profile_field = $db->fetch_array($query))
@@ -1057,15 +1078,10 @@ if($mybb->input['action'] == "edit")
 		$warning_level = get_colored_warning_level($warning_level);
 	}
 
-
+	$age = $lang->na;
 	if($user['birthday'])
 	{
 		$age = get_age($user['birthday']);
-	}
-
-	else
-	{
-		$age = '';
 	}
 
 	$table->construct_cell("<div style=\"width: 126px; height: 126px;\" class=\"user_avatar\"><img src=\"".htmlspecialchars_uni($user['avatar'])."\" style=\"margin-top: {$avatar_top}px\" width=\"{$scaled_dimensions['width']}\" height=\"{$scaled_dimensions['height']}\" alt=\"\" /></div>", array('rowspan' => 6, 'width' => 1));
@@ -1132,7 +1148,35 @@ if($mybb->input['action'] == "edit")
 	$form_container->output_row($lang->aim_handle, "", $form->generate_text_box('aim', $mybb->input['aim'], array('id' => 'aim')), 'aim');
 	$form_container->output_row($lang->yahoo_messanger_handle, "", $form->generate_text_box('yahoo', $mybb->input['yahoo'], array('id' => 'yahoo')), 'yahoo');
 	$form_container->output_row($lang->msn_messanger_handle, "", $form->generate_text_box('msn', $mybb->input['msn'], array('id' => 'msn')), 'msn');
+
 	// Birthday
+	$birthday_days = array(0 => '');
+	for($i = 1; $i <= 31; $i++)
+	{
+		$birthday_days[$i] = $i;
+	}
+
+	$birthday_months = array(
+		0 => '',
+		1 => $lang->january,
+		2 => $lang->february,
+		3 => $lang->march,
+		4 => $lang->april,
+		5 => $lang->may,
+		6 => $lang->june,
+		7 => $lang->july,
+		8 => $lang->august,
+		9 => $lang->september,
+		10 => $lang->october,
+		11 => $lang->november,
+		12 => $lang->december
+	);
+
+	$birthday_row = $form->generate_select_box('bday1', $birthday_days, $mybb->input['bday'][0], array('id' => 'bday_day'));
+	$birthday_row .= ' '.$form->generate_select_box('bday2', $birthday_months, $mybb->input['bday'][1], array('id' => 'bday_month'));
+	$birthday_row .= ' '.$form->generate_text_box('bday3', $mybb->input['bday'][2], array('id' => 'bday_year', 'style' => 'width: 3em;'));
+
+	$form_container->output_row($lang->birthday, "", $birthday_row, 'birthday');
 
 	// Output custom profile fields - optional
 	output_custom_profile_fields($profile_fields['optional'], $mybb->input['profile_fields'], $form_container, $form);
@@ -1459,7 +1503,7 @@ if($mybb->input['action'] == "edit")
 	);
 
 	echo "<div id=\"tab_modoptions\">\n";
-	$form_container = new FormContainer($lang->mod_options);
+	$form_container = new FormContainer($lang->mod_options.": {$user['username']}");
 	$form_container->output_row($lang->user_notes, '', $form->generate_text_area('usernotes', $mybb->input['usernotes'], array('id' => 'usernotes')), 'usernotes');
 
 	// Mod posts
@@ -1606,7 +1650,6 @@ if($mybb->input['action'] == "delete")
 	if($mybb->request_method == "post")
 	{
 		// Delete the user
-		$db->update_query("posts", array('uid' => 0), "uid='{$user['uid']}'");
 		$db->delete_query("userfields", "ufid='{$user['uid']}'");
 		$db->delete_query("privatemessages", "uid='{$user['uid']}'");
 		$db->delete_query("events", "uid='{$user['uid']}'");
@@ -1619,10 +1662,17 @@ if($mybb->input['action'] == "delete")
 		$db->delete_query("joinrequests", "uid='{$user['uid']}'");
 		$db->delete_query("warnings", "uid='{$user['uid']}'");
 		$db->delete_query("reputation", "uid='{$user['uid']}' OR adduid='{$user['uid']}'");
-		$db->delete_query("awaitingactivation", "uid='{$uid}'");
+		$db->delete_query("awaitingactivation", "uid='{$user['uid']}'");
+		$db->delete_query("posts", "uid = '{$user['uid']}' AND visible = '-2'");
+		$db->delete_query("threads", "uid = '{$user['uid']}' AND visible = '-2'");
 
 		// Update forum stats
 		update_stats(array('numusers' => '-1'));
+
+		// Update forums & threads if user is the lastposter
+		$db->update_query("posts", array('uid' => 0), "uid='{$user['uid']}'");
+		$db->update_query("forums", array("lastposteruid" => 0), "lastposteruid = '{$user['uid']}'");
+		$db->update_query("threads", array("lastposteruid" => 0), "lastposteruid = '{$user['uid']}'");
 
 		// Did this user have an uploaded avatar?
 		if($user['avatartype'] == "upload")
@@ -1846,6 +1896,13 @@ if($mybb->input['action'] == "merge")
 				$cache->update_moderators();
 			}
 
+			// Forums & Threads
+			$db->update_query("forums", array("lastposteruid" => $destination_user['uid']), "lastposteruid = '{$source_user['uid']}'");
+			$db->update_query("threads", array("lastposteruid" => $destination_user['uid']), "lastposteruid = '{$source_user['uid']}'");
+
+			// Banning
+			$db->update_query("banned", array('admin' => $destination_user['uid']), "admin = '{$source_user['uid']}'");
+
 			// Merging Reputation
 			// First, let's change all the details over to our new user...
 			$rep_update = array(
@@ -2057,7 +2114,7 @@ if($mybb->input['action'] == "search")
 			$admin_view['sortby'] = $mybb->input['sortby'];
 		}
 		
-		if($mybb->input['perpage'])
+		if(intval($mybb->input['perpage']))
 		{
 			$admin_view['perpage'] = $mybb->input['perpage'];
 		}
@@ -2586,8 +2643,8 @@ if($mybb->input['action'] == "inline_edit")
 						}
 
 						// Require the rebuild functions
-						require_once(MYBB_ROOT.'/inc/functions.php');
-						require_once(MYBB_ROOT.'/inc/functions_rebuild.php');
+						require_once MYBB_ROOT.'/inc/functions.php';
+						require_once MYBB_ROOT.'/inc/functions_rebuild.php';
 
 						// We've finished deleting user's posts, so let's delete the threads
 						if(is_array($prune_array['to_delete']) && count($prune_array['to_delete']) > 0)
@@ -2713,7 +2770,7 @@ if($mybb->input['action'] == "inline_edit")
 								unset($mybb->input['additionalgroups'][$key]);
 							}
 						}
-						$additionalgroups = implode(",", $mybb->input['additionalgroups']);
+						$additionalgroups = implode(",", array_map('intval', $mybb->input['additionalgroups']));
 					}
 					else
 					{
@@ -2722,9 +2779,9 @@ if($mybb->input['action'] == "inline_edit")
 
 					// Create an update array
 					$update_array = array(
-						"usergroup" => $mybb->input['usergroup'],
+						"usergroup" => intval($mybb->input['usergroup']),
 						"additionalgroups" => $additionalgroups,
-						"displaygroup" => $mybb->input['displaygroup']
+						"displaygroup" => intval($mybb->input['displaygroup'])
 					);
 
 					// Do the usergroup update for all those selected
@@ -3196,6 +3253,13 @@ function build_users_view($view)
 
 		foreach($view['conditions']['usergroup'] as $usergroup)
 		{
+			$usergroup = intval($usergroup);
+		
+			if(!$usergroup)
+			{
+				continue;
+			}
+
 			switch($db->type)
 			{
 				case "pgsql":
@@ -3206,7 +3270,8 @@ function build_users_view($view)
 					$additional_sql .= "OR CONCAT(',',additionalgroups,',') LIKE '%,{$usergroup},%'";
 			}
 		}
-		$search_sql .= " AND (u.usergroup IN (".implode(",", $view['conditions']['usergroup']).") {$additional_sql})";
+
+		$search_sql .= " AND (u.usergroup IN (".implode(",", array_map('intval', $view['conditions']['usergroup'])).") {$additional_sql})";
 	}
 
 	// COPPA users only?

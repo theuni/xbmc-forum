@@ -65,13 +65,6 @@ inlineEditor.prototype = {
 			return false;
 		}
 
-		// detect right click and ignore if possible
-		var rightclick;
-		if (!e) var e = window.event;
-		if (e.which) rightclick = (e.which == 3);
-			else if (e.button) rightclick = (e.button == 2);
-		if (rightclick) return false;
-
 		// Fix for konqueror which likes to set event element as the text not the link
 		if(typeof(element.id) == "undefined" && typeof(element.parentNode.id) != "undefined")
 		{
@@ -80,7 +73,7 @@ inlineEditor.prototype = {
 
 		this.currentElement = element.id;
 		this.timeout = setTimeout(this.showTextbox.bind(this), 1200);
-		document.onmouseup = element.onmouseup = this.onMouseUp.bindAsEventListener(this);
+		document.onmouseup = this.onMouseUp.bindAsEventListener(this);
 		return false;
 	},
 

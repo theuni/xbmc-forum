@@ -3,7 +3,7 @@
  * MyBB 1.6 English Language Pack
  * Copyright 2010 MyBB Group, All Rights Reserved
  * 
- * $Id: managegroup.lang.php 5297 2010-12-28 22:01:14Z Tomm $
+ * $Id: managegroup.lang.php 5702 2011-12-07 09:01:51Z Tomm $
  */
 
 $l['nav_group_management'] = "{1} Group Management";
@@ -33,6 +33,7 @@ $l['decline'] = "Decline";
 $l['action_requests'] = "Perform Actions";
 $l['join_requests_moderated'] = "The join requests have been moderated.<br />You will now be taken to the request listing.";
 $l['no_requests'] = "There are currently no pending join requests for this group.";
+$l['no_users'] = "There are no users in this group.";
 $l['user_added'] = "The user has been added to the user group.";
 $l['users_removed'] = "The selected users have been removed from the user group.";
 $l['group_no_members'] = "There are currently no members in this group.<br />To return to the group management page, click <a href=\"usercp.php?action=usergroups\">here</a>.";

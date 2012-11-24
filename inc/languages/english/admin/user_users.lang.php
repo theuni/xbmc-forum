@@ -3,7 +3,7 @@
  * MyBB 1.6 English Language Pack
  * Copyright 2010 MyBB Group, All Rights Reserved
  * 
- * $Id: user_users.lang.php 5595 2011-09-14 14:03:32Z Tomm $
+ * $Id: user_users.lang.php 5696 2011-12-06 11:10:25Z Tomm $
  */
 
 $l['users'] = "Users";
@@ -157,6 +157,7 @@ $l['icq_number'] = "ICQ Number";
 $l['aim_handle'] = "AIM Handle";
 $l['yahoo_messanger_handle'] = "Yahoo! Messenger Handle";
 $l['msn_messanger_handle'] = "MSN Messenger Handle";
+$l['birthday'] = "Date of Birth";
 
 $l['hide_from_whos_online'] = "Hide from the Who's Online list";
 $l['login_cookies_privacy'] = "Login, Cookies &amp; Privacy";
@@ -329,7 +330,7 @@ $l['is_exactly'] = "Is exactly";
 $l['less_than'] = "Less than";
 $l['post_count_is'] = "Post count is";
 $l['reg_ip_matches'] = "Registration IP address matches";
-$l['wildcard'] = "* denotes a wild card";
+$l['wildcard'] = "* denotes an IP byte wild card: 1.2.*.*";
 $l['posted_with_ip'] = "Has posted with the IP address";
 $l['custom_profile_fields_match'] = "Where custom profile fields match...";
 $l['is_not_blank'] = " is not empty";

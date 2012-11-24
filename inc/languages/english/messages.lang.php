@@ -3,7 +3,7 @@
  * MyBB 1.6 English Language Pack
  * Copyright 2010 MyBB Group, All Rights Reserved
  * 
- * $Id: messages.lang.php 5488 2011-07-12 13:23:02Z Tomm $
+ * $Id: messages.lang.php 5740 2011-12-30 20:01:16Z ralgith $
  */
 
 $l['click_no_wait'] = "Click here if you don't want to wait any longer.";
@@ -12,6 +12,8 @@ $l['redirect_emailsent'] = "Your e-mail message has been sent successfully.";
 $l['redirect_loggedin'] = "You have successfully been logged in.<br />You will now be taken back to where you came from.";
 
 $l['error_invalidpworusername'] = "You have entered an invalid username/password combination. <br /><br />If you have forgotten your password please <a href=\"member.php?action=lostpw\">retrieve a new one</a>.";
+$l['error_invalidpworusername1'] = "You have entered an invalid email/password combination. <br /><br />If you have forgotten your password please <a href=\"member.php?action=lostpw\">retrieve a new one</a>.";
+$l['error_invalidpworusername2'] = "You have entered an invalid username/password or email/password combination. <br /><br />If you have forgotten your password please <a href=\"member.php?action=lostpw\">retrieve a new one</a>.";
 $l['error_incompletefields'] = "It appears you have left one or more required fields blank. Please go back and enter the required fields."; 
 $l['error_alreadyuploaded'] = "This post already contains an attachment with the same name. Please rename the file and upload it again. Alternatively you may click \"Update Attachment\".";
 $l['error_alreadyuploaded_perm'] = "This post already contains an attachment with the same name. Please either remove the existing file or rename the file and upload it again.";
@@ -108,6 +110,38 @@ Activation Code: {5}
 
 Thank you,
 {2} Staff";
+$l['email_lostpw1'] = "{1},
+
+To complete the phase of resetting your account password at {2}, you will need to go to the URL below in your web browser.
+
+{3}/member.php?action=resetpassword&uid={4}&code={5}
+
+If the above link does not work correctly, go to
+
+{3}/member.php?action=resetpassword
+
+You will need to enter the following:
+Your email address
+Activation Code: {5}
+
+Thank you,
+{2} Staff";
+$l['email_lostpw2'] = "{1},
+
+To complete the phase of resetting your account password at {2}, you will need to go to the URL below in your web browser.
+
+{3}/member.php?action=resetpassword&uid={4}&code={5}
+
+If the above link does not work correctly, go to
+
+{3}/member.php?action=resetpassword
+
+You will need to enter the following:
+Username: {1} (Or your email address)
+Activation Code: {5}
+
+Thank you,
+{2} Staff";
 
 
 $l['email_reportpost'] = "{1} from {2} has reported this post:
@@ -138,6 +172,30 @@ $l['email_randompassword'] = "{1},
 Thank you for registering on {2}. Below is your username and the randomly generated password. To login to {2}, you will need these details.
 
 Username: {3}
+Password: {4}
+
+It is recommended you change your password immediately after you login. You can do this by going to your User CP then clicking Change Password on the left menu.
+
+Thank you,
+{2} Staff";
+
+$l['email_randompassword1'] = "{1},
+
+Thank you for registering on {2}. Below is your username and the randomly generated password. To login to {2}, you will need these details.
+
+Your email address
+Password: {4}
+
+It is recommended you change your password immediately after you login. You can do this by going to your User CP then clicking Change Password on the left menu.
+
+Thank you,
+{2} Staff";
+
+$l['email_randompassword2'] = "{1},
+
+Thank you for registering on {2}. Below is your username and the randomly generated password. To login to {2}, you will need these details.
+
+Username: {3} (Or your email address)
 Password: {4}
 
 It is recommended you change your password immediately after you login. You can do this by going to your User CP then clicking Change Password on the left menu.
@@ -199,6 +257,40 @@ If the above link does not work correctly, go to
 
 You will need to enter the following:
 Username: {1}
+Activation Code: {5}
+
+Thank you,
+{2} Staff";
+
+$l['email_activateaccount1'] = "{1},
+
+To complete the registration process on {2}, you will need to go to the URL below in your web browser.
+
+{3}/member.php?action=activate&uid={4}&code={5}
+
+If the above link does not work correctly, go to
+
+{3}/member.php?action=activate
+
+You will need to enter the following:
+Your email address
+Activation Code: {5}
+
+Thank you,
+{2} Staff";
+
+$l['email_activateaccount2'] = "{1},
+
+To complete the registration process on {2}, you will need to go to the URL below in your web browser.
+
+{3}/member.php?action=activate&uid={4}&code={5}
+
+If the above link does not work correctly, go to
+
+{3}/member.php?action=activate
+
+You will need to enter the following:
+Username: {1} (Or your email address)
 Activation Code: {5}
 
 Thank you,

@@ -3,7 +3,7 @@
  * MyBB 1.6 English Language Pack
  * Copyright 2010 MyBB Group, All Rights Reserved
  * 
- * $Id: global.lang.php 5583 2011-09-13 10:32:05Z Tomm $
+ * $Id: global.lang.php 5828 2012-05-08 16:06:16Z Tomm $
  */
  
 $l['today'] = "Today";
@@ -36,6 +36,8 @@ $l['mybb_admin_login'] = "MyBB Control Panel - Login";
 $l['return_to_forum'] = "Return to forum";
 $l['please_login'] = "Please Login";
 $l['username'] = "Username:";
+$l['username1'] = "Email:";
+$l['username2'] = "Username/Email:";
 $l['password'] = "Password:";
 $l['login'] = "Login";
 $l['lost_password'] = "Forgot your password?";

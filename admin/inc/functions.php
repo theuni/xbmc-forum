@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: functions.php 5544 2011-08-08 15:41:40Z Tomm $
+ * $Id: functions.php 5829 2012-05-22 10:48:03Z Tomm $
  */
 
 /**
@@ -153,7 +153,7 @@ function draw_admin_pagination($page, $per_page, $total_items, $url)
 	if($from > 2)
 	{
 		$first = fetch_page_url($url, 1);
-		$pagination .= "<a href=\"{$first}\" title=\"Page 1\" class=\"pagination_first\">1</a> ... ";
+		$pagination .= "<a href=\"{$first}\" title=\"{$lang->page} 1\" class=\"pagination_first\">1</a> ... ";
 	}
 
 	for($i = $from; $i <= $to; ++$i)
@@ -300,15 +300,6 @@ function save_quick_perms($fid)
 				$ppolls = 0;
 			}
 			
-			if($canpostattachments[$usergroup['gid']] == 1)
-			{
-				$pattachments = 1;
-			}
-			else
-			{
-				$pattachments = 0;
-			}
-			
 			if(!$preplies && !$pthreads)
 			{
 				$ppost = 0;
@@ -324,7 +315,6 @@ function save_quick_perms($fid)
 				"canview" => intval($pview),
 				"canpostthreads" => intval($pthreads),
 				"canpostreplys" => intval($preplies),
-				"canpostattachments" => intval($pattachments),
 				"canpostpolls" => intval($ppolls),
 			);
 			
@@ -651,6 +641,12 @@ function check_template($template)
 {
 	// Check to see if our database password is in the template
 	if(preg_match("#database'?\\s*\]\\s*\[\\s*'?password#", $template))
+	{
+		return true;
+	}
+
+	// System calls via backtick
+	if(preg_match('#\$\s*\{#', $template))
 	{
 		return true;
 	}

@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: ratethread.php 5541 2011-08-08 12:20:04Z PirataNervo $
+ * $Id: ratethread.php 5716 2011-12-08 23:53:02Z Tomm $
  */
 
 define("IN_MYBB", 1);
@@ -29,7 +29,7 @@ if(!$thread['tid'])
 }
 
 $forumpermissions = forum_permissions($thread['fid']);
-if($forumpermissions['canview'] == 0 || $forumpermissions['canratethreads'] == 0 || $mybb->usergroup['canratethreads'] == 0)
+if($forumpermissions['canview'] == 0 || $forumpermissions['canratethreads'] == 0 || $mybb->usergroup['canratethreads'] == 0 || $mybb->settings['allowthreadratings'] == 0)
 {
 	error_no_permission();
 }

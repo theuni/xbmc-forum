@@ -3,7 +3,7 @@
  * MyBB 1.6 English Language Pack
  * Copyright 2010 MyBB Group, All Rights Reserved
  * 
- * $Id: user_groups.lang.php 5616 2011-09-20 13:24:59Z Tomm $
+ * $Id: user_groups.lang.php 5771 2012-04-19 09:37:36Z Tomm $
  */
 
 $l['user_groups'] = "User Groups";
@@ -78,7 +78,7 @@ $l['forum_team'] = "Yes, show this group on the 'forum team' page";
 $l['is_banned_group'] = "Yes, this is a banned group<br /><small>If this group is a 'banned' user group, users will be able to be 'banned' in to this user group.</small>";
 $l['publicly_joinable_options'] = "Publicly Joinable Options";
 $l['user_joinable'] = "Yes, users can freely join and leave this group";
-$l['moderate_join_requests'] = "Yes, all new join requests need to be moderated first";
+$l['moderate_join_requests'] = "Yes, all new join requests need to be moderated first<br /><small>Users must be able to freely join and leave this group for this to take effect.</small>";
 $l['can_set_as_display_group'] = "Yes, users can set this group as their display group<br /><small>If set to yes, users will be able to set this user group as their display group for user titles, stars, name style and group images.</small>";
 $l['moderation_administration_options'] = "Moderation/Administration Options";
 $l['is_super_mod'] = "Yes, users of this group are super moderators";
@@ -154,6 +154,7 @@ $l['can_view_ips'] = "Can view IP addresses on who's online?";
 $l['can_view_member_list'] = "Can view member list?";
 $l['show_in_birthday_list'] = "Can be shown in the birthday list?";
 $l['can_email_users'] = "Can send threads to friends and email users?";
+$l['can_email_users_override'] = "Can email users even if they appear on their ignore list?";
 $l['max_emails_per_day'] = "Maximum Emails Per Day:";
 $l['max_emails_per_day_desc'] = "The maximum number of emails users can send using the 'Email User' and 'Send Thread to Friend' features.";
 $l['outstanding_join_request'] = "outstanding join requests";
@@ -168,6 +169,7 @@ $l['error_invalid_username'] = "The username you entered is invalid.";
 $l['error_already_leader'] = "The user is already a leader of this user group.";
 $l['error_invalid_group_leader'] = "You specified an invalid group leader.";
 $l['error_missing_namestyle_username'] = "The username style must contain {username}";
+$l['error_disallowed_namestyle_username'] = "You can't use script, meta or base tags in the username style.";
 $l['error_default_group_delete'] = "Default groups cannot be deleted";
 
 $l['success_group_created'] = "The new user group has been created successfully.";

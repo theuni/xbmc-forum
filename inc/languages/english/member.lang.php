@@ -3,7 +3,7 @@
  * MyBB 1.6 English Language Pack
  * Copyright 2010 MyBB Group, All Rights Reserved
  * 
- * $Id: member.lang.php 5636 2011-10-26 08:52:41Z Tomm $
+ * $Id: member.lang.php 5741 2011-12-30 20:55:35Z ralgith $
  */
 
 $l['nav_register'] = "Register";
@@ -35,7 +35,7 @@ $l['lostpw_note'] = "Lost your password?";
 $l['lost_pw'] = "Lost Account Password";
 $l['lost_pw_form'] = "Lost Password Recovery Form";
 $l['email_address'] = "Email Address:";
-$l['request_user_pass'] = "Request Username / Password";
+$l['request_user_pass'] = "Request Login Credentials";
 $l['profile'] = "Profile of {1}";
 $l['registration_date'] = "Registration Date:";
 $l['date_of_birth'] = "Date of Birth:";

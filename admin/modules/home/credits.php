@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: credits.php 5642 2011-10-31 08:59:43Z Tomm $
+ * $Id: credits.php 5746 2012-02-03 10:03:25Z Tomm $
  */
 
 // Disallow direct access to this file for security reasons

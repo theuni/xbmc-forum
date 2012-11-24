@@ -3,7 +3,7 @@
  * MyBB 1.6 English Language Pack
  * Copyright 2010 MyBB Group, All Rights Reserved
  * 
- * $Id: config_banning.lang.php 5557 2011-08-26 14:06:44Z huji $
+ * $Id: config_banning.lang.php 5782 2012-04-19 11:56:13Z Tomm $
  */
  
 $l['banning'] = "Banning";
@@ -36,6 +36,7 @@ $l['ban_ip_address'] = "Ban IP Address";
 
 $l['error_missing_ban_input'] = "You did not enter a value to ban.";
 $l['error_invalid_filter'] = "The specified filter does not exist.";
+$l['error_filter_already_banned'] = "The filter you entered is already banned.";
 
 $l['success_ip_banned'] = "The IP address has been banned successfully.";
 $l['success_username_disallowed'] = "The username has been disallowed successfully.";

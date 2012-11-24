@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: class_parser.php 5616 2011-09-20 13:24:59Z Tomm $
+ * $Id: class_parser.php 5710 2011-12-08 14:51:56Z Tomm $
  */
 
 /*
@@ -966,7 +966,7 @@ class postParser
 			return "[video={$video}]{$url}[/video]";
 		}
 		
-		$parsed_url = @parse_url($url);
+		$parsed_url = @parse_url(urldecode($url));
 		if($parsed_url == false)
 		{
 			return "[video={$video}]{$url}[/video]";;

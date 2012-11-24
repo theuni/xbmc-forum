@@ -3,7 +3,7 @@
  * MyBB 1.6 English Language Pack
  * Copyright 2010 MyBB Group, All Rights Reserved
  * 
- * $Id: english.php 5641 2011-10-26 09:36:44Z Tomm $
+ * $Id: english.php 5828 2012-05-08 16:06:16Z Tomm $
  */
 
 // The friendly name of the language
@@ -16,7 +16,7 @@ $langinfo['author'] = "MyBulletinBoard";
 $langinfo['website'] = "http://mybb.com/";
 
 // Compatible version of MyBB
-$langinfo['version'] = "1606";
+$langinfo['version'] = "1608";
 
 // Sets if the translation includes the Admin CP (1 = yes, 0 = no)
 $langinfo['admin'] = 1;

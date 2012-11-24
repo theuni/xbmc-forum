@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: syndication.php 5297 2010-12-28 22:01:14Z Tomm $
+ * $Id: syndication.php 5777 2012-04-19 11:28:52Z Tomm $
  */
 
 define("IN_MYBB", 1);
@@ -133,13 +133,13 @@ $query = $db->simple_select("threads", "subject, tid, dateline, firstpost", "vis
 // Loop through all the threads.
 while($thread = $db->fetch_array($query))
 {
-    $items[$thread['tid']] = array(
-        "title" => $thread['subject'],
-        "link" => $channel['link'].get_thread_link($thread['tid']),        
-        "date" => $thread['dateline'],
-    );
-    
-    $firstposts[] = $thread['firstpost'];
+	$items[$thread['tid']] = array(
+		"title" => $parser->parse_badwords($thread['subject']),
+		"link" => $channel['link'].get_thread_link($thread['tid']),        
+		"date" => $thread['dateline'],
+	);
+
+	$firstposts[] = $thread['firstpost'];
 }
 
 if(!empty($firstposts))

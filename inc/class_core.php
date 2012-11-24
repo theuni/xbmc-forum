@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: class_core.php 5641 2011-10-26 09:36:44Z Tomm $
+ * $Id: class_core.php 5828 2012-05-08 16:06:16Z Tomm $
  */
 
 class MyBB {
@@ -15,14 +15,14 @@ class MyBB {
 	 *
 	 * @var string
 	 */
-	public $version = "1.6.6";
+	public $version = "1.6.8";
 	
 	/**
 	 * The version code of MyBB we're running.
 	 *
 	 * @var integer
 	 */
-	public $version_code = 1606;
+	public $version_code = 1608;
 	
 	/**
 	 * The current working directory.
@@ -116,7 +116,7 @@ class MyBB {
 	/**
 	 * Using built in shutdown functionality provided by register_shutdown_function for < PHP 5?
 	 */
-	public $use_shutdown = false;
+	public $use_shutdown = true;
 	
 	/**
 	 * Debug mode?

@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: functions.php 5639 2011-10-26 09:16:47Z Tomm $
+ * $Id: functions.php 5819 2012-04-27 15:39:09Z Tomm $
  */
 
 /**
@@ -92,12 +92,6 @@ function output_page($contents)
 	echo $contents;
 
 	$plugins->run_hooks("post_output_page");
-
-	// If the use shutdown functionality is turned off, run any shutdown related items now.
-	if($mybb->settings['useshutdownfunc'] == 0 && $mybb->use_shutdown != true)
-	{
-		run_shutdown();
-	}
 }
 
 /**
@@ -750,15 +744,29 @@ function error_no_permission()
 	else
 	{
 		// Redirect to where the user came from
-		if($_SERVER['HTTP_REFERER'])
+		$redirect_url = $_SERVER['PHP_SELF'];
+		if($_SERVER['QUERY_STRING'])
 		{
-			$redirect_url = htmlentities($_SERVER['HTTP_REFERER']);
+			$redirect_url .= '?'.$_SERVER['QUERY_STRING'];
 		}
-		else
-		{
-			$redirect_url = '';
-		}
+
+		$redirect_url = htmlspecialchars_uni($redirect_url);
 		
+		switch($mybb->settings['username_method'])
+		{
+			case 0:
+				$lang_username = $lang->username;
+				break;
+			case 1:
+				$lang_username = $lang->username1;
+				break;
+			case 2:
+				$lang_username = $lang->username2;
+				break;
+			default:
+				$lang_username = $lang->username;
+				break;
+		}
 		eval("\$errorpage = \"".$templates->get("error_nopermission")."\";");
 	}
 
@@ -825,7 +833,7 @@ function redirect($url, $message="", $title="")
 
 		run_shutdown();
 		
-		if(my_substr($url, 0, 7) !== 'http://' && my_substr($url, 0, 8) !== 'https://')
+		if(my_substr($url, 0, 7) !== 'http://' && my_substr($url, 0, 8) !== 'https://' && my_substr($url, 0, 1) !== '/')
 		{
 			header("Location: {$mybb->settings['bburl']}/{$url}");
 		}
@@ -1711,7 +1719,7 @@ function my_get_array_cookie($name, $id)
 		return false;
 	}
 
-	$cookie = unserialize($mybb->cookies['mybb'][$name]);
+	$cookie = my_unserialize($mybb->cookies['mybb'][$name]);
 
 	if(is_array($cookie) && isset($cookie[$id]))
 	{
@@ -1735,21 +1743,33 @@ function my_set_array_cookie($name, $id, $value, $expires="")
 	global $mybb;
 	
 	$cookie = $mybb->cookies['mybb'];
-	$newcookie = unserialize($cookie[$name]);
-
-	if(!is_array($newcookie))
-	{
-		// Burnt / malformed cookie - reset
-		$newcookie = array();
-	}
+	$newcookie = my_unserialize($cookie[$name]);
 
 	$newcookie[$id] = $value;
 	$newcookie = serialize($newcookie);
 	my_setcookie("mybb[$name]", addslashes($newcookie), $expires);
-	
+
 	// Make sure our current viarables are up-to-date as well
 	$mybb->cookies['mybb'][$name] = $newcookie;
 }
+
+/**
+ * Verifies that data passed is an array
+ *
+ * @param array Data to unserialize
+ * @return array Unserialized data array
+ */
+function my_unserialize($data)
+{
+	$array = unserialize($data);
+
+	if(!is_array($array))
+	{
+		$array = array();
+	}
+
+	return $array;
+} 
 
 /**
  * Returns the serverload of the system.
@@ -2092,6 +2112,15 @@ function update_thread_counters($tid, $changes=array())
 function update_thread_data($tid)
 {
 	global $db;
+
+	$thread = get_thread($tid);
+
+	// If this is a moved thread marker, don't update it - we need it to stay as it is
+	if(strpos($thread['closed'], 'moved|') !== false)
+	{
+		return false;
+	}
+
 	$query = $db->query("
 		SELECT u.uid, u.username, p.username AS postusername, p.dateline
 		FROM ".TABLE_PREFIX."posts p
@@ -2294,6 +2323,15 @@ function build_forum_jump($pid="0", $selitem="", $addselect="1", $depth="", $sho
 		else
 		{
 			$template = "advanced";
+
+			if(strpos(FORUM_URL, '.html') !== false)
+			{
+				$forum_link = "'".str_replace('{fid}', "'+this.options[this.selectedIndex].value+'", FORUM_URL)."'";
+			}
+			else
+			{
+				$forum_link = "'".str_replace('{fid}', "'+this.options[this.selectedIndex].value", FORUM_URL);
+			}
 		}
 
 		eval("\$forumjump = \"".$templates->get("forumjump_".$template)."\";");
@@ -2941,11 +2979,12 @@ function get_ip()
 
     if($plugins)
     {
-        $plugins->run_hooks("get_ip", array("ip" => $ip));
+    	$ip_array = array("ip" => &$ip); // Used for backwards compatibility on this hook with the updated run_hooks() function.
+        $plugins->run_hooks("get_ip", $ip_array);
     }
 
     return $ip;
-} 
+}
 
 /**
  * Fetch the friendly size (GB, MB, KB, B) for a specified file size.
@@ -5287,7 +5326,7 @@ function build_highlight_array($terms)
 		}
 
 		// Now make PREG compatible
-		$find = "#(?!<.*?)(".preg_quote($word, "#").")(?![^<>]*?>)#i";
+		$find = "#(?!<.*?)(".preg_quote($word, "#").")(?![^<>]*?>)#ui";
 		$replacement = "<span class=\"highlight\" style=\"padding-left: 0px; padding-right: 0px;\">$1</span>";
 		$highlight_cache[$find] = $replacement;
 	}
@@ -5382,27 +5421,32 @@ function is_banned_email($email, $update_lastuse=false)
 
 	$banned_cache = $cache->read("bannedemails");
 	
-	if(!$banned_cache)
+	if($banned_cache === false)
 	{
+		// Failed to read cache, see if we can rebuild it
 		$cache->update_bannedemails();
 		$banned_cache = $cache->read("bannedemails");
 	}
 
-	foreach($banned_cache as $banned_email)
+	if(is_array($banned_cache) && !empty($banned_cache))
 	{
-		// Make regular expression * match
-		$banned_email['filter'] = str_replace('\*', '(.*)', preg_quote($banned_email['filter'], '#'));
-
-		if(preg_match("#{$banned_email['filter']}#i", $email))
+		foreach($banned_cache as $banned_email)
 		{
-			// Updating last use
-			if($update_lastuse == true)
+			// Make regular expression * match
+			$banned_email['filter'] = str_replace('\*', '(.*)', preg_quote($banned_email['filter'], '#'));
+
+			if(preg_match("#{$banned_email['filter']}#i", $email))
 			{
-				$db->update_query("banfilters", array("lastuse" => TIME_NOW), "fid='{$banned_email['fid']}'");
+				// Updating last use
+				if($update_lastuse == true)
+				{
+					$db->update_query("banfilters", array("lastuse" => TIME_NOW), "fid='{$banned_email['fid']}'");
+				}
+				return true;
 			}
-			return true;
 		}
 	}
+
 	// Still here - good email
 	return false;
 }
@@ -5433,7 +5477,7 @@ function is_banned_ip($ip_address, $update_lastuse=false)
 		
 		// Make regular expression * match
 		$banned_ip['filter'] = str_replace('\*', '(.*)', preg_quote($banned_ip['filter'], '#'));
-		if(preg_match("#{$banned_ip['filter']}#i", $ip_address))
+		if(preg_match("#^{$banned_ip['filter']}$#i", $ip_address))
 		{
 			// Updating last use
 			if($update_lastuse == true)
@@ -5443,6 +5487,7 @@ function is_banned_ip($ip_address, $update_lastuse=false)
 			return true;
 		}
 	}
+
 	// Still here - good ip
 	return false;
 }
@@ -6216,13 +6261,13 @@ function trim_blank_chrs($string, $charlist=false)
 		0x0D => 1,
 		0x0B => 1,
 		0xAD => 1,
-		0xC2 => array(0xA0 => 1,
-					  0xAD => 1,
-					  0xBF => 1,
-					  0x81 => 1,
-					  0x8D => 1,
-					  0x90 => 1,
-					  0x9D => 1,),
+		0xA0 => 1,
+		0xAD => 1,
+		0xBF => 1,
+		0x81 => 1,
+		0x8D => 1,
+		0x90 => 1,
+		0x9D => 1,
 		0xCC => array(0xB7 => 1, 0xB8 => 1), // \x{0337} or \x{0338}
 		0xE1 => array(0x85 => array(0x9F => 1, 0xA0 => 1)), // \x{115F} or \x{1160}
 		0xE2 => array(0x80 => array(0x80 => 1, 0x81 => 1, 0x82 => 1, 0x83 => 1, 0x84 => 1, 0x85 => 1, 0x86 => 1, 0x87 => 1, 0x88 => 1, 0x89 => 1, 0x8A => 1, 0x8B => 1, // \x{2000} to \x{200B}

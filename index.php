@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: index.php 5594 2011-09-14 13:13:41Z Tomm $
+ * $Id: index.php 5765 2012-03-27 09:52:45Z Tomm $
  */
 
 define("IN_MYBB", 1);
@@ -38,6 +38,21 @@ else
 	//Function call is not fatal
 	if(login_attempt_check(false) !== false)
 	{
+		switch($mybb->settings['username_method'])
+		{
+			case 0:
+				$login_username = $lang->login_username;
+				break;
+			case 1:
+				$login_username = $lang->login_username1;
+				break;
+			case 2:
+				$login_username = $lang->login_username2;
+				break;
+			default:
+				$login_username = $lang->login_username;
+				break;
+		}
 		eval("\$loginform = \"".$templates->get("index_loginform")."\";");
 	}
 }
@@ -303,7 +318,7 @@ if($mybb->settings['showindexstats'] != 0)
 }
 
 // Show the board statistics table only if one or more index statistics are enabled.
-if($mybb->settings['showwol'] != 0 || $mybb->settings['showindexstats'] != 0 || ($mybb->settings['showbirthdays'] != 0 && $bdaycount > 0))
+if(($mybb->settings['showwol'] != 0 && $mybb->usergroup['canviewonline'] != 0) || $mybb->settings['showindexstats'] != 0 || ($mybb->settings['showbirthdays'] != 0 && $bdaycount > 0))
 {
 	if(!is_array($stats))
 	{
@@ -330,7 +345,7 @@ if($mybb->user['uid'] == 0)
 		ORDER BY pid, disporder
 	");
 	
-	$forumsread = unserialize($mybb->cookies['mybb']['forumread']);
+	$forumsread = my_unserialize($mybb->cookies['mybb']['forumread']);
 }
 else
 {
@@ -343,6 +358,7 @@ else
 		ORDER BY pid, disporder
 	");
 }
+
 while($forum = $db->fetch_array($query))
 {
 	if($mybb->user['uid'] == 0)

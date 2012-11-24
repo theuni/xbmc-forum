@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: init.php 5456 2011-05-01 14:25:55Z ralgith $
+ * $Id: init.php 5683 2011-11-29 15:02:41Z Tomm $
  */
 
 // Disallow direct access to this file for security reasons
@@ -200,10 +200,9 @@ $mybb->settings = &$settings;
 $mybb->parse_cookies();
 $mybb->cache = &$cache;
 
-if($mybb->settings['useshutdownfunc'] != 0)
+if($mybb->use_shutdown == true)
 {
-	$mybb->use_shutdown = true;
-	register_shutdown_function(array(&$mybb, "__destruct"));
+	register_shutdown_function('run_shutdown');
 }
 
 // Did we just upgrade to a new version and haven't run the upgrade scripts yet?

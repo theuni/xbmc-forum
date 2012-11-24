@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: badwords.php 5297 2010-12-28 22:01:14Z Tomm $
+ * $Id: badwords.php 5796 2012-04-19 14:38:15Z Tomm $
  */
 
 // Disallow direct access to this file for security reasons
@@ -37,7 +37,17 @@ if($mybb->input['action'] == "add" && $mybb->request_method == "post")
 	{
 		$errors[] = $lang->replacement_word_max;
 	}
-	
+
+	if(!$errors)
+	{
+		$query = $db->simple_select("badwords", "bid", "badword = '".$db->escape_string($mybb->input['badword'])."'");
+
+		if($db->num_rows($query))
+		{
+			$errors[] = $lang->error_bad_word_filtered;
+		}
+	}
+
 	$badword = str_replace('\*', '([a-zA-Z0-9_]{1})', preg_quote($mybb->input['badword'], "#"));
 	
 	// Don't allow certain badword replacements to be added if it would cause an infinite recursive loop.
@@ -211,6 +221,11 @@ if(!$mybb->input['action'])
 
 	$page->output_nav_tabs($sub_tabs, "badwords");
 
+	if($errors)
+	{
+		$page->output_inline_error($errors);
+	}
+
 	$table = new Table;
 	$table->construct_header($lang->bad_word);
 	$table->construct_header($lang->replacement, array("width" => "50%"));
@@ -241,10 +256,7 @@ if(!$mybb->input['action'])
 	$table->output($lang->bad_word_filters);
 
 	$form = new Form("index.php?module=config-badwords&amp;action=add", "post", "add");
-	if($errors)
-	{
-		$page->output_inline_error($errors);
-	}
+
 	$form_container = new FormContainer($lang->add_bad_word);
 	$form_container->output_row($lang->bad_word." <em>*</em>", $lang->bad_word_desc, $form->generate_text_box('badword', $mybb->input['badword'], array('id' => 'badword')), 'badword');
 	$form_container->output_row($lang->replacement, $lang->replacement_desc, $form->generate_text_box('replacement', $mybb->input['replacement'], array('id' => 'replacement')), 'replacement');

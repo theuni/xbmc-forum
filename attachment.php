@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: attachment.php 5297 2010-12-28 22:01:14Z Tomm $
+ * $Id: attachment.php 5799 2012-04-19 15:06:30Z Tomm $
  */
 
 define("IN_MYBB", 1);
@@ -127,7 +127,14 @@ else
 			break;
 
 		default:
-			header("Content-type: application/force-download");
+			$filetype = $attachment['filetype'];
+
+			if(!$filetype)
+			{
+				$filetype = 'application/force-download';
+			}
+
+			header("Content-type: {$filetype}");
 			$disposition = "attachment";
 	}
 

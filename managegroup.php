@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: managegroup.php 5297 2010-12-28 22:01:14Z Tomm $
+ * $Id: managegroup.php 5722 2011-12-10 00:29:10Z Tomm $
  */
 
 define("IN_MYBB", 1);
@@ -106,7 +106,7 @@ elseif($mybb->input['action'] == "do_joinrequests" && $mybb->request_method == "
 
 	$plugins->run_hooks("managegroup_do_joinrequests_end");
 
-	redirect("usercp.php?action=usergroups", $lang->join_requests_moderated);
+	redirect("managegroup.php?gid={$gid}", $lang->join_requests_moderated);
 }
 elseif($mybb->input['action'] == "joinrequests")
 {
@@ -165,7 +165,7 @@ elseif($mybb->input['action'] == "do_manageusers" && $mybb->request_method == "p
 
 	$plugins->run_hooks("managegroup_do_manageusers_end");
 
-	redirect("usercp.php?action=usergroups", $lang->users_removed);
+	redirect("managegroup.php?gid={$gid}", $lang->users_removed);
 }
 else
 {
@@ -297,6 +297,11 @@ else
 		}
 
 		eval("\$users .= \"".$templates->get("managegroup_user")."\";");
+	}
+
+	if(!$users)
+	{
+		eval("\$users = \"".$templates->get("managegroup_no_users")."\";");
 	}
 
 	$add_user = '';

@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: showthread.php 5639 2011-10-26 09:16:47Z Tomm $
+ * $Id: showthread.php 5806 2012-04-20 09:45:55Z Tomm $
  */
 
 define("IN_MYBB", 1);
@@ -80,11 +80,13 @@ if(!$thread['username'])
 }
 
 $visibleonly = "AND visible='1'";
+$visibleonly2 = "AND p.visible='1' AND t.visible='1'";
 
 // Is the currently logged in user a moderator of this forum?
 if(is_moderator($fid))
 {
 	$visibleonly = " AND (visible='1' OR visible='0')";
+	$visibleonly2 = "AND (p.visible='1' OR p.visible='0') AND (t.visible='1' OR t.visible='0')";
 	$ismod = true;
 }
 else
@@ -122,17 +124,6 @@ if(!$forum || $forum['type'] != "f")
 
 // Forumdisplay cache
 $forum_stats = $cache->read("forumsdisplay");
-
-if(!is_array($forum_stats))
-{
-	// Attempt to rebuild it?
-	$forum_stats = $cache->read("forumdisplay", true);
-
-	if(!is_array($forum_stats))
-	{
-		$forum_stats = array();
-	}
-}
 
 $breadcrumb_multipage = array();
 if($mybb->settings['showforumpagesbreadcrumb'])
@@ -280,7 +271,7 @@ if($mybb->input['action'] == "newpost")
 	);
 
 	$lastread = intval($lastread);
-	$query = $db->simple_select("posts", "pid", "tid='{$tid}' AND dateline > '{$lastread}'", $options);
+	$query = $db->simple_select("posts", "pid", "tid='{$tid}' AND dateline > '{$lastread}' {$visibleonly}", $options);
 	$newpost = $db->fetch_array($query);
 	
 	if($newpost['pid'] && $lastread)
@@ -315,7 +306,7 @@ if($mybb->input['action'] == "lastpost")
 			SELECT p.pid
 			FROM ".TABLE_PREFIX."posts p
 			LEFT JOIN ".TABLE_PREFIX."threads t ON(p.tid=t.tid)
-			WHERE t.fid='".$thread['fid']."' AND t.closed NOT LIKE 'moved|%'
+			WHERE t.fid='".$thread['fid']."' AND t.closed NOT LIKE 'moved|%' {$visibleonly2}
 			ORDER BY p.dateline DESC
 			LIMIT 1
 		");
@@ -329,7 +320,7 @@ if($mybb->input['action'] == "lastpost")
 			'limit_start' => 0,
 			'limit' => 1
 		);
-		$query = $db->simple_select('posts', 'pid', "tid={$tid}", $options);
+		$query = $db->simple_select('posts', 'pid', "tid={$tid} {$visibleonly}", $options);
 		$pid = $db->fetch_field($query, "pid");
 	}
 	header("Location: ".htmlspecialchars_decode(get_post_link($pid, $tid))."#pid{$pid}");
@@ -344,7 +335,7 @@ if($mybb->input['action'] == "nextnewest")
 		"limit" => 1,
 		"order_by" => "lastpost"
 	);
-	$query = $db->simple_select('threads', '*', "fid={$thread['fid']} AND lastpost > {$thread['lastpost']} AND visible=1 AND closed NOT LIKE 'moved|%'", $options);
+	$query = $db->simple_select('threads', '*', "fid={$thread['fid']} AND lastpost > {$thread['lastpost']} {$visibleonly} AND closed NOT LIKE 'moved|%'", $options);
 	$nextthread = $db->fetch_array($query);
 
 	// Are there actually next newest posts?
@@ -375,7 +366,7 @@ if($mybb->input['action'] == "nextoldest")
 		"order_by" => "lastpost",
 		"order_dir" => "desc"
 	);
-	$query = $db->simple_select("threads", "*", "fid=".$thread['fid']." AND lastpost < ".$thread['lastpost']." AND visible=1 AND closed NOT LIKE 'moved|%'", $options);
+	$query = $db->simple_select("threads", "*", "fid=".$thread['fid']." AND lastpost < ".$thread['lastpost']." {$visibleonly} AND closed NOT LIKE 'moved|%'", $options);
 	$nextthread = $db->fetch_array($query);
 
 	// Are there actually next oldest posts?
@@ -650,7 +641,7 @@ if($mybb->input['action'] == "thread")
 
 	// Work out the thread rating for this thread.
 	$rating = '';
-	if($forum['allowtratings'] != 0)
+	if($mybb->settings['allowthreadratings'] != 0 && $forum['allowtratings'] != 0)
 	{
 		$rated = 0;
 		$lang->load("ratethread");
@@ -990,7 +981,7 @@ if($mybb->input['action'] == "thread")
 					SELECT t.*, t.username AS threadusername, u.username
 					FROM ".TABLE_PREFIX."threads t
 					LEFT JOIN ".TABLE_PREFIX."users u ON (u.uid = t.uid), plainto_tsquery ('".$db->escape_string($thread['subject'])."') AS query
-					WHERE t.fid='{$thread['fid']}' AND t.tid!='{$thread['tid']}' AND t.visible='1' AND t.closed NOT LIKE 'moved|%' AND t.subject @@ query AND ts_rank_cd(to_tsvector('english',t.subject), query ) >= '{$mybb->settings['similarityrating']}'
+					WHERE t.fid='{$thread['fid']}' AND t.tid!='{$thread['tid']}' AND t.visible='1' AND t.closed NOT LIKE 'moved|%' AND t.subject @@ query
 					ORDER BY t.lastpost DESC
 					OFFSET 0 LIMIT {$mybb->settings['similarlimit']}
 				");
@@ -1105,10 +1096,10 @@ if($mybb->input['action'] == "thread")
 	// If the user is a moderator, show the moderation tools.
 	if($ismod)
 	{
-		if($forum_stats[-1]['modtools'] || $forum_stats[$forum['fid']]['modtools'])
+		$customthreadtools = $customposttools = '';
+
+		if(is_moderator($forum['fid'], "canusecustomtools") && ($forum_stats[-1]['modtools'] || $forum_stats[$forum['fid']]['modtools']))
 		{
-			$customthreadtools = $customposttools = '';
-	
 			switch($db->type)
 			{
 				case "pgsql":
@@ -1118,7 +1109,7 @@ if($mybb->input['action'] == "thread")
 				default:
 					$query = $db->simple_select("modtools", "tid, name, type", "CONCAT(',',forums,',') LIKE '%,$fid,%' OR CONCAT(',',forums,',') LIKE '%,-1,%' OR forums=''");
 			}
-		
+	
 			while($tool = $db->fetch_array($query))
 			{
 				if($tool['type'] == 'p')
@@ -1145,8 +1136,10 @@ if($mybb->input['action'] == "thread")
 		{
 			eval("\$customthreadtools = \"".$templates->get("showthread_moderationoptions_custom")."\";");
 		}
+
 		eval("\$moderationoptions = \"".$templates->get("showthread_moderationoptions")."\";");
 	}
+
 	$lang->newthread_in = $lang->sprintf($lang->newthread_in, $forum['name']);
 	
 	// Subscription status

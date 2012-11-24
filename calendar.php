@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: calendar.php 5420 2011-04-05 08:20:02Z Tomm $
+ * $Id: calendar.php 5746 2012-02-03 10:03:25Z Tomm $
  */
 
 define("IN_MYBB", 1);
@@ -674,7 +674,7 @@ if($mybb->input['action'] == "editevent")
 	}
 
 	$event['name'] = htmlspecialchars_uni($event['name']);
-
+	
 	add_breadcrumb(htmlspecialchars_uni($calendar['name']), get_calendar_link($calendar['cid']));
 	add_breadcrumb($event['name'], get_event_link($event['eid']));
 	add_breadcrumb($lang->nav_editevent);
@@ -1218,12 +1218,12 @@ if($mybb->input['action'] == "event")
 	}
 
 	$event['name'] = htmlspecialchars_uni($event['name']);
-	
+
 	add_breadcrumb(htmlspecialchars_uni($calendar['name']), get_calendar_link($calendar['cid']));
 	add_breadcrumb($event['name'], get_event_link($event['eid']));
 
 	$plugins->run_hooks("calendar_event_start");
-	
+
 	$event_parser_options = array(
 		"allow_html" => $calendar['allowhtml'],
 		"allow_mycode" => $calendar['allowmycode'],

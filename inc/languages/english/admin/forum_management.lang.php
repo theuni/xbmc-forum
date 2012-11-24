@@ -3,7 +3,7 @@
  * MyBB 1.6 English Language Pack
  * Copyright 2010 MyBB Group, All Rights Reserved
  * 
- * $Id: forum_management.lang.php 5557 2011-08-26 14:06:44Z huji $
+ * $Id: forum_management.lang.php 5828 2012-05-08 16:06:16Z Tomm $
  */
 
 $l['forum_management'] = "Forum Management";
@@ -74,6 +74,7 @@ $l['can_view_ips'] = "Can view IPs?";
 $l['can_open_close_threads'] = "Can open/close and stick/unstick threads?";
 $l['can_manage_threads'] = "Can manage threads (split, move, copy, merge)?";
 $l['can_move_to_other_forums'] = "Can move threads to another forum this user doesn't moderate?";
+$l['can_use_custom_tools'] = "Can use custom moderator tools?";
 $l['save_mod'] = "Save Moderator";
 
 $l['no_forums'] = "There are no forums found.";
@@ -144,6 +145,7 @@ $l['forum_specific_style'] = "Forum-Specific Style:";
 $l['use_default'] = "Use Default";
 $l['dont_display_rules'] = "Don't display rules for this forum";
 $l['display_rules_inline'] = "Display rules for this forum on the thread listing";
+$l['display_rules_inline_new'] = "Display rules in the thread listing and for new threads/replies";
 $l['display_rules_link'] = "Display a link to the rules for this forum";
 $l['display_method'] = "Display Method:";
 $l['rules'] = "Rules:";

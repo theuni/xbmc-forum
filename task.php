@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: task.php 5297 2010-12-28 22:01:14Z Tomm $
+ * $Id: task.php 5683 2011-11-29 15:02:41Z Tomm $
  */
  
 ignore_user_abort(true);
@@ -59,7 +59,7 @@ else
 	echo base64_decode("R0lGODlhAQABAIAAAP///wAAACH5BAEAAAAALAAAAAABAAEAAAICRAEAOw==");
 	
 	// If the use shutdown functionality is turned off, run any shutdown related items now.
-	if($mybb->settings['useshutdownfunc'] != 0 || $mybb->use_shutdown == true)
+	if($mybb->use_shutdown == true)
 	{
 		add_shutdown("run_task");
 	}

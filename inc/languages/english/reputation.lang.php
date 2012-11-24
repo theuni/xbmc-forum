@@ -3,7 +3,7 @@
  * MyBB 1.6 English Language Pack
  * Copyright 2010 MyBB Group, All Rights Reserved
  *
- * $Id: reputation.lang.php 5593 2011-09-14 10:28:41Z Tomm $
+ * $Id: reputation.lang.php 5750 2012-03-09 12:21:10Z Tomm $
  */
 
 $l['nav_reputation'] = "Reputation Report";
@@ -76,7 +76,7 @@ $l['postrep_post'] = "Post #";
 $l['postrep_given'] = "Rating given for {1}<br />";
 $l['no_reputation_votes'] = "This user currently does not have any reputation ratings with the specified criteria below.";
 $l['delete_reputation_confirm'] = "Are you sure you wish to delete this reputation Rating?";
-$l['delete_reputation_log'] = "Removed Reputation by {1}";
+$l['delete_reputation_log'] = "Deleted reputation rating by {1} (UID: {2})";
 $l['reputations_disabled_group'] = "The reputation system is disabled for users of this user group.";
 $l['rate_user'] = "Rate user";
 ?>

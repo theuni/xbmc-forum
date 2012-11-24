@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: post.php 5625 2011-10-02 19:16:35Z ralgith $
+ * $Id: post.php 5828 2012-05-08 16:06:16Z Tomm $
  */
 
 // Disallow direct access to this file for security reasons
@@ -145,6 +145,7 @@ class PostDataHandler extends DataHandler
 		global $db;
 		$post = &$this->data;
 		$subject = &$post['subject'];
+		$subject = trim_blank_chrs($subject);
 
 		// Are we editing an existing thread or post?
 		if($this->method == "update" && $post['pid'])
@@ -173,7 +174,7 @@ class PostDataHandler extends DataHandler
 			}
 
 			// If this is the first post there needs to be a subject, else make it the default one.
-			if(my_strlen(trim_blank_chrs($subject)) == 0 && $first_post)
+			if(my_strlen($subject) == 0 && $first_post)
 			{
 				$this->set_error("firstpost_no_subject");
 				return false;
@@ -188,7 +189,7 @@ class PostDataHandler extends DataHandler
 		// This is a new post
 		else if($this->action == "post")
 		{
-			if(my_strlen(trim_blank_chrs($subject)) == 0)
+			if(my_strlen($subject) == 0)
 			{
 				$thread = get_thread($post['tid']);
 				$subject = "RE: ".$thread['subject'];
@@ -198,11 +199,18 @@ class PostDataHandler extends DataHandler
 		// This is a new thread and we require that a subject is present.
 		else
 		{
-			if(my_strlen(trim_blank_chrs($subject)) == 0)
+			if(my_strlen($subject) == 0)
 			{
 				$this->set_error("missing_subject");
 				return false;
 			}
+		}
+
+		if(my_strlen($subject) > 85)
+		{
+			// Subject is too long
+			$this->set_error('subject_too_long', my_strlen($subject));
+			return false;
 		}
 
 		// Subject is valid - return true.
@@ -219,9 +227,10 @@ class PostDataHandler extends DataHandler
 		global $mybb;
 
 		$post = &$this->data;
-		
+		$post['message'] = trim_blank_chrs($post['message']);
+
 		// Do we even have a message at all?
-		if(my_strlen(trim_blank_chrs($post['message'])) == 0)
+		if(my_strlen($post['message']) == 0)
 		{
 			$this->set_error("missing_message");
 			return false;
@@ -626,7 +635,7 @@ class PostDataHandler extends DataHandler
 			$this->verify_options();
 		}
 
-		$plugins->run_hooks_by_ref("datahandler_post_validate_post", $this);
+		$plugins->run_hooks("datahandler_post_validate_post", $this);
 
 		// We are done validating, return.
 		$this->set_validated(true);
@@ -784,7 +793,7 @@ class PostDataHandler extends DataHandler
 			{
 				$this->pid = $double_post['pid'];
 				
-				$post['message'] = $double_post['message'] .= $mybb->settings['postmergesep']."\n".$post['message'];
+				$post['message'] = $double_post['message'] .= "\n".$mybb->settings['postmergesep']."\n".$post['message'];
 				$update_query = array(
 					"message" => $db->escape_string($double_post['message'])
 				);
@@ -864,7 +873,7 @@ class PostDataHandler extends DataHandler
 				"posthash" => $db->escape_string($post['posthash'])
 			);
 
-			$plugins->run_hooks_by_ref("datahandler_post_insert_post", $this);
+			$plugins->run_hooks("datahandler_post_insert_post", $this);
 
 			$db->update_query("posts", $this->post_update_data, "pid='{$post['pid']}'");
 			$this->pid = $post['pid'];
@@ -890,7 +899,7 @@ class PostDataHandler extends DataHandler
 				"posthash" => $db->escape_string($post['posthash'])
 			);
 
-			$plugins->run_hooks_by_ref("datahandler_post_insert_post", $this);
+			$plugins->run_hooks("datahandler_post_insert_post", $this);
 
 			$this->pid = $db->insert_query("posts", $this->post_insert_data);
 		}
@@ -1081,7 +1090,7 @@ class PostDataHandler extends DataHandler
 			$this->verify_options();
 		}
 
-		$plugins->run_hooks_by_ref("datahandler_post_validate_thread", $this);
+		$plugins->run_hooks("datahandler_post_validate_thread", $this);
 
 		// We are done validating, return.
 		$this->set_validated(true);
@@ -1176,7 +1185,7 @@ class PostDataHandler extends DataHandler
 				"visible" => $visible
 			);
 
-			$plugins->run_hooks_by_ref("datahandler_post_insert_thread", $this);
+			$plugins->run_hooks("datahandler_post_insert_thread", $this);
 
 			$db->update_query("threads", $this->thread_insert_data, "tid='{$thread['tid']}'");
 
@@ -1192,7 +1201,7 @@ class PostDataHandler extends DataHandler
 				"visible" => $visible,
 				"posthash" => $db->escape_string($thread['posthash'])
 			);
-			$plugins->run_hooks_by_ref("datahandler_post_insert_thread_post", $this);
+			$plugins->run_hooks("datahandler_post_insert_thread_post", $this);
 
 			$db->update_query("posts", $this->post_insert_data, "pid='{$thread['pid']}'");
 			$this->tid = $thread['tid'];
@@ -1218,7 +1227,7 @@ class PostDataHandler extends DataHandler
 				"notes" => ''
 			);
 
-			$plugins->run_hooks_by_ref("datahandler_post_insert_thread", $this);
+			$plugins->run_hooks("datahandler_post_insert_thread", $this);
 
 			$this->tid = $db->insert_query("threads", $this->thread_insert_data);
 
@@ -1238,7 +1247,7 @@ class PostDataHandler extends DataHandler
 				"visible" => $visible,
 				"posthash" => $db->escape_string($thread['posthash'])
 			);
-			$plugins->run_hooks_by_ref("datahandler_post_insert_thread_post", $this);
+			$plugins->run_hooks("datahandler_post_insert_thread_post", $this);
 
 			$this->pid = $db->insert_query("posts", $this->post_insert_data);
 
@@ -1587,7 +1596,7 @@ class PostDataHandler extends DataHandler
 			}
 			if(count($this->thread_update_data) > 0)
 			{
-				$plugins->run_hooks_by_ref("datahandler_post_update_thread", $this);
+				$plugins->run_hooks("datahandler_post_update_thread", $this);
 
 				$db->update_query("threads", $this->thread_update_data, "tid='".intval($post['tid'])."'");
 			}
@@ -1633,7 +1642,7 @@ class PostDataHandler extends DataHandler
 
 		$this->post_update_data['visible'] = $visible;
 		
-		$plugins->run_hooks_by_ref("datahandler_post_update", $this);
+		$plugins->run_hooks("datahandler_post_update", $this);
 
 		$db->update_query("posts", $this->post_update_data, "pid='".intval($post['pid'])."'");
 

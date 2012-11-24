@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: reputation.php 5628 2011-10-06 08:24:24Z Tomm $
+ * $Id: reputation.php 5802 2012-04-20 08:29:09Z Tomm $
  */
 
 define("IN_MYBB", 1);
@@ -434,8 +434,7 @@ if($mybb->input['action'] == "delete")
 	$reputation_value = $db->fetch_field($query, "reputation_count");
 
 	// Create moderator log
-	$rep_remove = build_profile_link($existing_reputation['username'], $existing_reputation['adduid']);
-	log_moderator_action(array("uid" => $user['uid'], "username" => $user['username']), $lang->sprintf($lang->delete_reputation_log, $rep_remove));
+	log_moderator_action(array("uid" => $user['uid'], "username" => $user['username']), $lang->sprintf($lang->delete_reputation_log, $existing_reputation['username'], $existing_reputation['adduid']));
 
 	$db->update_query("users", array('reputation' => intval($reputation_value)), "uid='{$uid}'");
 
@@ -445,15 +444,20 @@ if($mybb->input['action'] == "delete")
 // Otherwise, show a listing of reputations for the given user.
 if(!$mybb->input['action'])
 {
-	if($user_permissions['usereputationsystem'] != 1)
-	{
-		error($lang->reputations_disabled_group);
-	}
-
 	if($mybb->usergroup['canviewprofiles'] == 0)
 	{
 		// Reputation page is a part of a profile
 		error_no_permission();
+	}
+
+	// Fetch display group properties.
+	$displaygroupfields = array('title', 'description', 'namestyle', 'usertitle', 'stars', 'starimage', 'image', 'usereputationsystem');
+	$display_group = usergroup_displaygroup($user['displaygroup']);
+
+	if($user_permissions['usereputationsystem'] != 1 || $display_group['title'] && $display_group['usereputationsystem'] == 0)
+	{
+		// Group has reputation disabled or user has a display group that has reputation disabled
+		error($lang->reputations_disabled_group);
 	}
 
 	$lang->nav_profile = $lang->sprintf($lang->nav_profile, $user['username']);
@@ -467,9 +471,6 @@ if(!$mybb->input['action'])
 	{
 		$user['displaygroup'] = $user['usergroup'];
 	}
-
-	// Fetch display group properties.
-	$display_group = usergroup_displaygroup($user['displaygroup']);
 
 	// This user has a custom user title
 	if(trim($user['usertitle']) != '')
@@ -798,7 +799,8 @@ if(!$mybb->input['action'])
 			"allow_html" => 0,
 			"allow_mycode" => 0,
 			"allow_smilies" => 1,
-			"allow_imgcode" => 0
+			"allow_imgcode" => 0,
+			"filter_badwords" => 1
 		);
 
 		$reputation_vote['comments'] = $parser->parse_message($reputation_vote['comments'], $reputation_parser);

@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: akismet.php 5297 2010-12-28 22:01:14Z Tomm $
+ * $Id: akismet.php 5746 2012-02-03 10:03:25Z Tomm $
  */
 
 // Disallow direct access to this file for security reasons
@@ -55,7 +55,7 @@ function akismet_info()
 		"name"          => $lang->akismet,
 		"description"   => $lang->akismet_desc,
 		"website"       => "http://mybb.com",
-		"author"        => "MyBB Group, da-anda (TeamXBMC)",
+		"author"        => "MyBB Group",
 		"authorsite"    => "http://mybb.com",
 		"version"       => "1.2.2",
 		"guid"          => "e57a80dbe7ff85083596a1a3b7da3ce7",
@@ -182,27 +182,14 @@ function akismet_install()
 		'gid' => $group['gid']
 	);
 	$db->insert_query("settings", $insertarray);
-
-// addition by da-anda
-	$insertarray = array(
-		'name' => 'akismetmaxpostcount',
-		'title' => 'Max Post count',
-		'description' => 'The post count up to which akismet is used on new posts of users.',
-		'optionscode' => 'text',
-		'value' => '10',
-		'disporder' => 3,
-		'gid' => $group['gid']
-	);
-	$db->insert_query("settings", $insertarray);
-//-end
-
+	
 	$insertarray = array(
 		'name' => 'akismetfidsignore',
 		'title' => 'Forums to Ignore',
 		'description' => 'Forums, separated by a comma, to ignore. Use the forum id, <strong>not the name</strong>.',
 		'optionscode' => 'text',
 		'value' => '',
-		'disporder' => 4,
+		'disporder' => 3,
 		'gid' => $group['gid']
 	);
 	$db->insert_query("settings", $insertarray);
@@ -212,8 +199,8 @@ function akismet_install()
 		'title' => 'Usergroups to Ignore',
 		'description' => 'Usergroups, separated by a comma, to ignore. Use the usergroup id, <strong>not the name</strong>.',
 		'optionscode' => 'text',
-		'value' => '6,4,3,8',
-		'disporder' => 5,
+		'value' => '6,4,3',
+		'disporder' => 4,
 		'gid' => $group['gid']
 	);
 	$db->insert_query("settings", $insertarray);
@@ -262,9 +249,7 @@ function akismet_activate()
 	
 	$insert_array = array(
 		'title' => 'akismet_postbit_spam',
-// changed template - da-anda
-		'template' => $db->escape_string('<a href="{$mybb->settings[\'bburl\']}/moderation.php?action=mark_as_spam&amp;pid={$post[\'pid\']}&amp;fid={$post[\'fid\']}" class="button button-small link-spam"><span class="icon"></span>{$lang->spam}</a>'),
-// - end change
+		'template' => $db->escape_string('<a href="{$mybb->settings[\'bburl\']}/moderation.php?action=mark_as_spam&amp;pid={$post[\'pid\']}&amp;fid={$post[\'fid\']}"><img src="{$theme[\'imglangdir\']}/postbit_spam.gif" alt="{$lang->spam}" /></a>'),
 		'sid' => '-1',
 		'version' => '',
 		'dateline' => TIME_NOW
@@ -297,19 +282,16 @@ function akismet_uninstall()
 	{
 		$db->write_query("ALTER TABLE ".TABLE_PREFIX."users DROP akismetstopped");
 	}
-
-// added maxpostcount - da-anda
+	
 	// DELETE ALL SETTINGS TO AVOID DUPLICATES
 	$db->write_query("DELETE FROM ".TABLE_PREFIX."settings WHERE name IN(
 		'akismetswitch',
 		'akismetapikey',
 		'akismetnumtillban',
-		'akismetmaxpostcount',
 		'akismetfidsignore',
 		'akismetuidsignore',
 		'akismetuserstoignore'
 	)");
-// - end change
 	$db->delete_query("settinggroups", "name = 'akismet'");
 	$db->delete_query("datacache", "title = 'akismet_update_check'");
 	rebuild_settings();
@@ -586,16 +568,14 @@ function akismet_postbit(&$post)
 	{
 		return;
 	}
-
+	
 	if($mybb->settings['akismetuidsignore'])
 	{
 		$akismet_uids_ignore = explode(',', $mybb->settings['akismetuidsignore']);
-// fixed bug with ignored usergroups - da-anda
-		if(in_array($post['usergroup'], $akismet_uids_ignore))
+		if(in_array($usergroup, $akismet_uids_ignore))
 		{
 			return;
 		}
-// - end fix
 	}
 	
 	if(is_super_admin($post['uid']))
@@ -626,19 +606,14 @@ function akismet_verify(&$post)
 function akismet_fake_draft(&$post)
 {
 	global $mybb, $isspam, $akismet, $cache;
-
+	
 	$exclude_array = explode(',', $mybb->settings['akismetuserstoignore']);
 	
 	if(!$mybb->settings['akismetswitch'] || in_array($mybb->user['uid'], $exclude_array) || is_super_admin($mybb->user['uid']))
 	{
 		return;
 	}
-// addition by da-anda
-	if ($mybb->settings['akismetmaxpostcount'] && $mybb->user['postnum'] > $mybb->settings['akismetmaxpostcount']) {
-		return;	
-	}
-// - end addition
-
+	
 	if($mybb->settings['akismetfidsignore'])
 	{
 		$akismet_fids_ignore = explode(',', $mybb->settings['akismetfidsignore']);
@@ -1432,7 +1407,7 @@ class Akismet {
 			$http_request .= "Host: {$api_key}{$this->host}\r\n";
 			$http_request .= "Content-Type: application/x-www-form-urlencoded; charset=UTF-8\r\n";
 			$http_request .= "Content-Length: ".strlen($request)."\r\n";
-			$http_request .= "User-Agent: MyBB/1.4 | Akismet/1.1\r\n";
+			$http_request .= "User-Agent: MyBB/1.6 | Akismet/1.1\r\n";
 			$http_request .= "Connection: close\r\n";
 			$http_request .= "\r\n";
 			$http_request .= $request;

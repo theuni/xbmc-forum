@@ -6,13 +6,13 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: announcements.php 5565 2011-09-08 09:07:55Z Tomm $
+ * $Id: announcements.php 5815 2012-04-23 15:27:28Z Tomm $
  */
 
 define("IN_MYBB", 1);
 define('THIS_SCRIPT', 'announcements.php');
 
-$templatelist = "announcement,postbit_groupimage,postbit_reputation,postbit_avatar,postbit_online,postbit_offline,postbit_find,postbit_pm,postbit_email,postbit_www,postbit_author_user,announcement_edit,announcement_quickdelete,postbit";
+$templatelist = "announcement,postbit_groupimage,postbit_reputation,postbit_avatar,postbit_online,postbit_offline,postbit_find,postbit_pm,postbit_email,postbit_www,postbit_author_user,announcement_edit,announcement_quickdelete,postbit,postbit_rep_button ";
 require_once "./global.php";
 require_once MYBB_ROOT."inc/functions_post.php";
 
@@ -99,6 +99,7 @@ foreach($data_key as $field => $key)
 $announcementarray['dateline'] = $announcementarray['startdate'];
 $announcementarray['userusername'] = $announcementarray['username'];
 $announcement = build_postbit($announcementarray, 3);
+$announcementarray['subject'] = $parser->parse_badwords($announcementarray['subject']);
 $lang->forum_announcement = $lang->sprintf($lang->forum_announcement, htmlspecialchars_uni($announcementarray['subject']));
 
 if($announcementarray['startdate'] > $mybb->user['lastvisit'])
@@ -106,7 +107,7 @@ if($announcementarray['startdate'] > $mybb->user['lastvisit'])
 	$setcookie = true;
 	if($mybb->cookies['mybb']['announcements'])
 	{
-		$cookie = unserialize(stripslashes($mybb->cookies['mybb']['announcements']));
+		$cookie = my_unserialize(stripslashes($mybb->cookies['mybb']['announcements']));
 	
 		if(isset($cookie[$announcementarray['aid']]))
 		{

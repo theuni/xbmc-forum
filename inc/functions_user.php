@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: functions_user.php 5616 2011-09-20 13:24:59Z Tomm $
+ * $Id: functions_user.php 5734 2011-12-22 16:50:54Z ralgith $
  */
 
 /**
@@ -40,7 +40,8 @@ function username_exists($username)
 {
 	global $db;
 
-	$query = $db->simple_select("users", "COUNT(*) as user", "LOWER(username)='".$db->escape_string(my_strtolower($username))."'", array('limit' => 1));
+	$username = $db->escape_string(my_strtolower($username));
+	$query = $db->simple_select("users", "COUNT(*) as user", "LOWER(username)='".$username."' OR LOWER(email)='".$username."'", array('limit' => 1));
 
 	if($db->fetch_field($query, 'user') == 1)
 	{
@@ -61,9 +62,24 @@ function username_exists($username)
  */
 function validate_password_from_username($username, $password)
 {
-	global $db;
+	global $db, $mybb;
 
-	$query = $db->simple_select("users", "uid,username,password,salt,loginkey,coppauser,usergroup", "LOWER(username)='".$db->escape_string(my_strtolower($username))."'", array('limit' => 1));
+	$username = $db->escape_string(my_strtolower($username));
+	switch($mybb->settings['username_method'])
+	{
+		case 0:
+			$query = $db->simple_select("users", "uid,username,password,salt,loginkey,coppauser,usergroup", "LOWER(username)='".$username."'", array('limit' => 1));
+			break;
+		case 1:
+			$query = $db->simple_select("users", "uid,username,password,salt,loginkey,coppauser,usergroup", "LOWER(email)='".$username."'", array('limit' => 1));
+			break;
+		case 2:
+			$query = $db->simple_select("users", "uid,username,password,salt,loginkey,coppauser,usergroup", "LOWER(username)='".$username."' OR LOWER(email)='".$username."'", array('limit' => 1));
+			break;
+		default:
+			$query = $db->simple_select("users", "uid,username,password,salt,loginkey,coppauser,usergroup", "LOWER(username)='".$username."'", array('limit' => 1));
+			break;
+	}
 
 	$user = $db->fetch_array($query);
 	if(!$user['uid'])

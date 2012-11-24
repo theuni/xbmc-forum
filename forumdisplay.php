@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: forumdisplay.php 5655 2011-11-27 00:10:00Z Tomm $
+ * $Id: forumdisplay.php 5787 2012-04-19 13:30:23Z Tomm $
  */
 
 define("IN_MYBB", 1);
@@ -84,9 +84,9 @@ if($fpermissions['canview'] != 1)
 if($mybb->user['uid'] == 0)
 {
 	// Cookie'd forum read time
-	$forumsread = unserialize($mybb->cookies['mybb']['forumread']);
- 
- 	if(!is_array($forumsread))
+	$forumsread = my_unserialize($mybb->cookies['mybb']['forumread']);
+
+ 	if(is_array($forumsread) && empty($forumsread))
  	{
  		if($mybb->cookies['mybb']['readallforums'])
 		{
@@ -172,12 +172,33 @@ if($fpermissions['cansearch'] != 0 && $foruminfo['type'] == "f")
 	eval("\$searchforum = \"".$templates->get("forumdisplay_searchforum")."\";");
 }
 
+// Gather forum stats
+$has_announcements = $has_modtools = false;
+$forum_stats = $cache->read("forumsdisplay");
+
+if(is_array($forum_stats))
+{
+	if($forum_stats[-1]['modtools'] || $forum_stats[$fid]['modtools'])
+	{
+		// Mod tools are specific to forums, not parents
+		$has_modtools = true;
+	}
+
+	if($forum_stats[-1]['announcements'] || $forum_stats[$fid]['announcements'])
+	{
+		// Global or forum-specific announcements
+		$has_announcements = true;
+	}
+}
+
 $done_moderators = array(
 	"users" => array(),
 	"groups" => array()
 );
+
 $moderators = '';
 $parentlistexploded = explode(",", $parentlist);
+
 foreach($parentlistexploded as $mfid)
 {
 	// This forum has moderators
@@ -209,6 +230,11 @@ foreach($parentlistexploded as $mfid)
 				$comma = $lang->comma;
 			}
 		}
+	}
+
+	if($forum_stats[$mfid]['announcements'])
+	{
+		$has_announcements = true;
 	}
 }
 $comma = '';
@@ -313,7 +339,7 @@ if($foruminfo['rulestype'] != 0 && $foruminfo['rules'])
 	);
 
 	$foruminfo['rules'] = $parser->parse_message($foruminfo['rules'], $rules_parser);
-	if($foruminfo['rulestype'] == 1)
+	if($foruminfo['rulestype'] == 1 || $foruminfo['rulestype'] == 3)
 	{
 		eval("\$rules = \"".$templates->get("forumdisplay_rules")."\";");
 	}
@@ -592,7 +618,7 @@ else
 }
 $multipage = multipage($threadcount, $perpage, $page, $page_url);
 
-if($foruminfo['allowtratings'] != 0 && $fpermissions['canviewthreads'] != 0)
+if($mybb->settings['allowthreadratings'] != 0 && $foruminfo['allowtratings'] != 0 && $fpermissions['canviewthreads'] != 0)
 {
 	$lang->load("ratethread");
 
@@ -628,15 +654,7 @@ if($ismod)
 }
 
 // Get Announcements
-$forum_stats = $cache->read("forumsdisplay");
-
-if(!is_array($forum_stats))
-{
-	$forum_stats = $cache->read("forumdisplay", true);
-}
-
-$parentlist_exp = explode(',', $parentlist);
-if(is_array($forum_stats) && ($forum_stats[-1]['announcements'] || array_intersect_key(array_flip($parentlist_exp), $forum_stats)))
+if($has_announcements == true)
 {
 	$limit = '';
 	$announcements = '';
@@ -659,7 +677,7 @@ if(is_array($forum_stats) && ($forum_stats[-1]['announcements'] || array_interse
 	$cookie = array();
 	if(isset($mybb->cookies['mybb']['announcements']))
 	{
-		$cookie = unserialize(stripslashes($mybb->cookies['mybb']['announcements']));
+		$cookie = my_unserialize(stripslashes($mybb->cookies['mybb']['announcements']));
 	}
 
 	$bgcolor = alt_trow(true); // Reset the trow colors
@@ -689,7 +707,7 @@ if(is_array($forum_stats) && ($forum_stats[-1]['announcements'] || array_interse
 		$posttime = my_date($mybb->settings['timeformat'], $announcement['startdate']);
 		$announcement['profilelink'] = build_profile_link($announcement['username'], $announcement['uid']);
 
-		if($foruminfo['allowtratings'] != 0 && $fpermissions['canviewthreads'] != 0)
+		if($mybb->settings['allowthreadratings'] != 0 && $foruminfo['allowtratings'] != 0 && $fpermissions['canviewthreads'] != 0)
 		{
 			eval("\$rating = \"".$templates->get("forumdisplay_announcement_rating")."\";");
 			$lpbackground = "trow2";
@@ -776,7 +794,7 @@ if($fpermissions['canviewthreads'] != 0)
 		}
 	}
 
-	if($foruminfo['allowtratings'] != 0 && $mybb->user['uid'] && $tids && $ratings == true)
+	if($mybb->settings['allowthreadratings'] != 0 && $foruminfo['allowtratings'] != 0 && $mybb->user['uid'] && $tids && $ratings == true)
 	{
 		// Check if we've rated threads on this page
 		// Guests get the pleasure of not being ID'd, but will be checked when they try and rate
@@ -869,6 +887,16 @@ $threads = '';
 $load_inline_edit_js = 0;
 if(is_array($threadcache))
 {
+	if(!$mybb->settings['maxmultipagelinks'])
+	{
+		$mybb->settings['maxmultipagelinks'] = 5;		
+	}
+
+	if(!$mybb->settings['postsperpage'])
+	{
+		$mybb->settings['postperpage'] = 20;
+	}
+
 	foreach($threadcache as $thread)
 	{
 		$plugins->run_hooks("forumdisplay_thread");
@@ -947,7 +975,7 @@ if(is_array($threadcache))
 		}
 
 		$rating = '';
-		if($foruminfo['allowtratings'] != 0)
+		if($mybb->settings['allowthreadratings'] != 0 && $foruminfo['allowtratings'] != 0)
 		{
 			if($moved[0] == "moved")
 			{
@@ -976,11 +1004,6 @@ if(is_array($threadcache))
 		$morelink = '';
 		$thread['posts'] = $thread['replies'] + 1;
 
-		if(!$mybb->settings['postsperpage'])
-		{
-			$mybb->settings['postperpage'] = 20;
-		}
-
 		if($thread['unapprovedposts'] > 0 && $ismod)
 		{
 			$thread['posts'] += $thread['unapprovedposts'];
@@ -991,9 +1014,9 @@ if(is_array($threadcache))
 			$thread['pages'] = $thread['posts'] / $mybb->settings['postsperpage'];
 			$thread['pages'] = ceil($thread['pages']);
 
-			if($thread['pages'] > 5)
+			if($thread['pages'] > $mybb->settings['maxmultipagelinks'])
 			{
-				$pagesstop = 4;
+				$pagesstop = $mybb->settings['maxmultipagelinks'] - 1;
 				$page_link = get_thread_link($thread['tid'], $thread['pages']);
 				eval("\$morelink = \"".$templates->get("forumdisplay_thread_multipage_more")."\";");
 			}
@@ -1193,7 +1216,7 @@ if(is_array($threadcache))
 	$customthreadtools = '';
 	if($ismod)
 	{
-		if($forum_stats[-1]['modtools'] || $forum_stats[$fid]['modtools'])
+		if(is_moderator($fid, "canusecustomtools") && $has_modtools == true)
 		{
 			switch($db->type)
 			{
@@ -1209,11 +1232,13 @@ if(is_array($threadcache))
 			{
 				eval("\$customthreadtools .= \"".$templates->get("forumdisplay_inlinemoderation_custom_tool")."\";");
 			}
+			
+			if($customthreadtools)
+			{
+				eval("\$customthreadtools = \"".$templates->get("forumdisplay_inlinemoderation_custom")."\";");
+			}
 		}
-		else
-		{
-			eval("\$customthreadtools = \"".$templates->get("forumdisplay_inlinemoderation_custom")."\";");
-		}
+
 		eval("\$inlinemod = \"".$templates->get("forumdisplay_inlinemoderation")."\";");
 	}
 }

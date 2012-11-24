@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: functions_view_manager.php 5460 2011-05-10 11:21:21Z Tomm $
+ * $Id: functions_view_manager.php 5823 2012-05-03 15:40:09Z Tomm $
  */
 
 /**
@@ -34,20 +34,21 @@ function view_manager($base_url, $type, $fields, $sort_options=array(), $conditi
 		'description' => $lang->create_new_view_desc
 	);
 
-	$page->add_breadcrumb_item($lang->view_manager);
+	$page->add_breadcrumb_item($lang->view_manager, 'index.php?module=user-users&amp;action=views');
 
 	// Lang strings should be in global lang file
 
 	if($mybb->input['do'] == "set_default")
 	{
-		$query = $db->simple_select("adminviews", "vid", "vid='".intval($mybb->input['vid'])."'");
+		$query = $db->simple_select("adminviews", "vid, uid, visibility", "vid='".intval($mybb->input['vid'])."'");
 		$admin_view = $db->fetch_array($query);
-		
+
 		if(!$admin_view['vid'] || $admin_view['visibility'] == 1 && $mybb->user['uid'] != $admin_view['uid'])
 		{
 			flash_message($lang->error_invalid_admin_view, 'error');
 			admin_redirect($base_url."&action=views");
 		}
+
 		set_default_view($type, $admin_view['vid']);
 		flash_message($lang->succuss_view_set_as_default, 'success');
 		admin_redirect($base_url."&action=views");
@@ -126,7 +127,8 @@ function view_manager($base_url, $type, $fields, $sort_options=array(), $conditi
 		// Write in our JS based field selector
 		$page->extra_header .= "<script src=\"../jscripts/scriptaculous.js?load=effects,dragdrop\" type=\"text/javascript\"></script>\n";
 		$page->extra_header .= "<script src=\"jscripts/view_manager.js\" type=\"text/javascript\"></script>\n";
-		
+
+		$page->add_breadcrumb_item($lang->create_new_view);
 		$page->output_header($lang->create_new_view);
 			
 		$form = new Form($base_url."&amp;action=views&amp;do=add", "post");
@@ -307,19 +309,12 @@ document.write('".str_replace("/", "\/", $field_select)."');
 				admin_redirect($base_url."&vid={$admin_view['vid']}");
 			}
 		}
-		else
-		{
-			$default_view = fetch_default_view($type);
-			if($default_view = $view['vid'])
-			{
-				$mybb->input['isdefault'] = 1;
-			}
-		}
 		
 		// Write in our JS based field selector
 		$page->extra_header .= "<script src=\"../jscripts/scriptaculous.js?load=effects,dragdrop\" type=\"text/javascript\"></script>\n";
 		$page->extra_header .= "<script src=\"jscripts/view_manager.js\" type=\"text/javascript\"></script>\n";
 
+		$page->add_breadcrumb_item($lang->edit_view);
 		$page->output_header($lang->edit_view);
 			
 		$form = new Form($base_url."&amp;action=views&amp;do=edit&amp;vid={$admin_view['vid']}", "post");
@@ -344,6 +339,14 @@ document.write('".str_replace("/", "\/", $field_select)."');
 			$admin_view['fields'] = unserialize($admin_view['fields']);
 			$admin_view['profile_fields'] = unserialize($admin_view['custom_profile_fields']);
 			$mybb->input = $admin_view;
+
+			$mybb->input['isdefault'] = 0;
+			$default_view = fetch_default_view($type);
+
+			if($default_view == $admin_view['vid'])
+			{
+				$mybb->input['isdefault'] = 1;
+			}
 		}
 
 		$form_container = new FormContainer($lang->edit_view);
@@ -461,10 +464,11 @@ document.write('".str_replace("/", "\/", $field_select)."');
 			admin_redirect($base_url."&action=views");
 		}
 		
-		$query = $db->simple_select("adminviews", "vid", "vid='".intval($mybb->input['vid'])."'");
+		$vid = intval($mybb->input['vid']);
+		$query = $db->simple_select("adminviews", "vid, uid, visibility", "vid = '{$vid}'");
 		$admin_view = $db->fetch_array($query);
 		
-		if(!$admin_view['vid'] || $admin_view['visibility'] == 1 && $mybb->user['uid'] != $admin_view['uid'])
+		if($vid == 1 || !$admin_view['vid'] || $admin_view['visibility'] == 1 && $mybb->user['uid'] != $admin_view['uid'])
 		{
 			flash_message($lang->error_invalid_view_delete, 'error');
 			admin_redirect($base_url."&action=views");
@@ -602,7 +606,7 @@ document.write('".str_replace("/", "\/", $field_select)."');
 				$popup->add_item($lang->set_as_default, "{$base_url}&amp;action=views&amp;do=set_default&amp;vid={$view['vid']}");
 			}
 			
-			if($views > 1)
+			if($views > 1 && $view['vid'] != 1)
 			{
 				$popup->add_item($lang->delete_view, "{$base_url}&amp;action=views&amp;do=delete&amp;vid={$view['vid']}&amp;my_post_key={$mybb->post_code}", "return AdminCP.deleteConfirmation(this, '{$lang->confirm_view_deletion}')");
 			}

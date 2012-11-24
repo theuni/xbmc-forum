@@ -1,9 +1,9 @@
 <?php
 /**
  * MyBB 1.6 English Language Pack
- * Copyright Œ 2010 MyBB Group, All Rights Reserved
+ * Copyright 2010 MyBB Group, All Rights Reserved
  * 
- * $Id: config_spiders.lang.php 5297 2010-12-28 22:01:14Z Tomm $
+ * $Id: config_spiders.lang.php 5833 2012-05-24 08:39:00Z Tomm $
  */
  
 $l['spiders_bots'] = "Spiders / Bots";

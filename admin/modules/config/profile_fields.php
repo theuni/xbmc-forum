@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: profile_fields.php 5616 2011-09-20 13:24:59Z Tomm $
+ * $Id: profile_fields.php 5748 2012-03-09 11:49:19Z Tomm $
  */
 
 // Disallow direct access to this file for security reasons
@@ -63,7 +63,7 @@ if($mybb->input['action'] == "add")
 				"required" => $db->escape_string($mybb->input['required']),
 				"editable" => $db->escape_string($mybb->input['editable']),
 				"hidden" => $db->escape_string($mybb->input['hidden']),
-				"postnum" => $db->escape_string($mybb->input['postnum'])
+				"postnum" => intval($mybb->input['postnum'])
 			);
 			
 			$fid = $db->insert_query("profilefields", $new_profile_field);

@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: pm.php 5625 2011-10-02 19:16:35Z ralgith $
+ * $Id: pm.php 5756 2012-03-09 15:05:12Z Tomm $
  */
 
 // Disallow direct access to this file for security reasons
@@ -141,7 +141,7 @@ class PMDataHandler extends DataHandler
 	 */
 	function verify_recipient()
 	{
-		global $db, $mybb, $lang;
+		global $cache, $db, $mybb, $lang;
 
 		$pm = &$this->data;
 
@@ -304,7 +304,17 @@ class PMDataHandler extends DataHandler
 				}
 				$emailmessage = $lang->sprintf($emailmessage, $user['username'], $mybb->settings['bbname'], $mybb->settings['bburl']);
 				$emailsubject = $lang->sprintf($emailsubject, $mybb->settings['bbname']);
-				my_mail($user['email'], $emailsubject, $emailmessage);
+
+				$new_email = array(
+					"mailto" => $db->escape_string($user['email']),
+					"mailfrom" => '',
+					"subject" => $db->escape_string($emailsubject),
+					"message" => $db->escape_string($emailmessage),
+					"headers" => ''
+				);
+
+				$db->insert_query("mailqueue", $new_email);
+				$cache->update_mailqueue();
 	
 				if($this->admin_override != true)
 				{
@@ -425,7 +435,7 @@ class PMDataHandler extends DataHandler
 
 		$this->verify_options();
 
-		$plugins->run_hooks_by_ref("datahandler_pm_validate", $this);
+		$plugins->run_hooks("datahandler_pm_validate", $this);
 
 		// Choose the appropriate folder to save in.
 		if($pm['saveasdraft'])
@@ -456,7 +466,7 @@ class PMDataHandler extends DataHandler
 	 */
 	function insert_pm()
 	{
-		global $db, $mybb, $plugins, $lang;
+		global $cache, $db, $mybb, $plugins, $lang;
 
 		// Yes, validating is required.
 		if(!$this->get_validated())
@@ -546,7 +556,7 @@ class PMDataHandler extends DataHandler
 				$this->pm_insert_data['deletetime'] = $pm['pmid'];
 			}
 
-			$plugins->run_hooks_by_ref("datahandler_pm_insert_updatedraft", $this);
+			$plugins->run_hooks("datahandler_pm_insert_updatedraft", $this);
 			$db->insert_query("privatemessages", $this->pm_insert_data);
 
 			// If this is a draft, end it here - below deals with complete messages
@@ -597,13 +607,23 @@ class PMDataHandler extends DataHandler
 				
 				$emailmessage = $lang->sprintf($emailmessage, $recipient['username'], $pm['sender']['username'], $mybb->settings['bbname'], $mybb->settings['bburl']);
 				$emailsubject = $lang->sprintf($emailsubject, $mybb->settings['bbname']);
-				my_mail($recipient['email'], $emailsubject, $emailmessage);
+				
+				$new_email = array(
+					"mailto" => $db->escape_string($recipient['email']),
+					"mailfrom" => '',
+					"subject" => $db->escape_string($emailsubject),
+					"message" => $db->escape_string($emailmessage),
+					"headers" => ''
+				);
+
+				$db->insert_query("mailqueue", $new_email);
+				$cache->update_mailqueue();
 			}
 
 			$this->pm_insert_data['uid'] = $recipient['uid'];
 			$this->pm_insert_data['toid'] = $recipient['uid'];
 
-			$plugins->run_hooks_by_ref("datahandler_pm_insert", $this);
+			$plugins->run_hooks("datahandler_pm_insert", $this);
 			$this->pmid = $db->insert_query("privatemessages", $this->pm_insert_data);
 
 			// If PM noices/alerts are on, show!
@@ -644,7 +664,7 @@ class PMDataHandler extends DataHandler
 		// If we're saving a copy
 		if($pm['options']['savecopy'] != 0)
 		{
-			if(count($recipient_list['to']) == 1)
+			if(isset($recipient_list['to']) && count($recipient_list['to']) == 1)
 			{
 				$this->pm_insert_data['toid'] = $uid;
 			}
@@ -657,7 +677,7 @@ class PMDataHandler extends DataHandler
 			$this->pm_insert_data['status'] = 1;
 			$this->pm_insert_data['receipt'] = 0;
 
-			$plugins->run_hooks_by_ref("datahandler_pm_insert_savedcopy", $this);
+			$plugins->run_hooks("datahandler_pm_insert_savedcopy", $this);
 			$db->insert_query("privatemessages", $this->pm_insert_data);
 
 			// Because the sender saved a copy, update their total pm count

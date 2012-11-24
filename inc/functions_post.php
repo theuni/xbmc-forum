@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: functions_post.php 5651 2011-11-14 08:45:52Z Tomm $
+ * $Id: functions_post.php 5753 2012-03-09 14:53:07Z Tomm $
  */
 
 /**
@@ -579,7 +579,8 @@ function build_postbit($post, $post_type=0)
 			"allow_mycode" => $mybb->settings['sigmycode'],
 			"allow_smilies" => $mybb->settings['sigsmilies'],
 			"allow_imgcode" => $mybb->settings['sigimgcode'],
-			"me_username" => $post['username']
+			"me_username" => $post['username'],
+			"filter_badwords" => 1
 		);
 
 		if($usergroup['signofollow'])

@@ -3,7 +3,7 @@
  * MyBB 1.6 English Language Pack
  * Copyright 2010 MyBB Group, All Rights Reserved
  * 
- * $Id: xmlhttp.lang.php 5297 2010-12-28 22:01:14Z Tomm $
+ * $Id: xmlhttp.lang.php 5701 2011-12-07 08:48:12Z Tomm $
  */
 
 $l['no_new_subject'] = "You did not enter a new subject.";
@@ -24,7 +24,7 @@ $l['captcha_does_not_match'] = "The image verification code that you entered was
 $l['captcha_matches'] = "The image verification code you entered was correct.";
 $l['banned_username'] = "The username you entered has been disallowed by the administrator";
 $l['banned_characters_username'] = "Your username contains one or more invalid characters";
-$l['complex_password_fails'] = "Password is not complex enough";
+$l['complex_password_fails'] = "Password requires an upper case letter, lower case letter and a number";
 $l['username_taken'] = "{1} is already registered by another member";
 $l['username_available'] = "{1} is available";
 $l['invalid_username'] = "{1} is not the username of a registered member";

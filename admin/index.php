@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: index.php 5621 2011-09-26 18:35:54Z ralgith $
+ * $Id: index.php 5757 2012-03-09 15:11:56Z Tomm $
  */
 
 define("IN_MYBB", 1);
@@ -151,9 +151,10 @@ elseif($mybb->input['do'] == "login")
 			"ip" => $db->escape_string(get_ip()),
 			"dateline" => TIME_NOW,
 			"lastactive" => TIME_NOW,
-			"data" => "",
+			"data" => serialize(array()),
 		);
 		$db->insert_query("adminsessions", $admin_session);
+		$admin_session['data'] = array();
 		$db->update_query("adminoptions", array("loginattempts" => 0, "loginlockoutexpiry" => 0), "uid='".intval($mybb->user['uid'])."'", 1);
 		my_setcookie("adminsid", $sid);
 		my_setcookie('acploginattempts', 0);
@@ -411,6 +412,8 @@ if(!$mybb->user['uid'] || $logged_out == true)
 $page->add_breadcrumb_item($lang->home, "index.php");
 
 // Begin dealing with the modules
+$is_super_admin = is_super_admin($mybb->user['uid']);
+
 $modules_dir = MYBB_ADMIN_DIR."modules";
 $dir = opendir($modules_dir);
 while(($module = readdir($dir)) !== false)
@@ -425,7 +428,7 @@ while(($module = readdir($dir)) !== false)
 		$has_permission = false;
 		if(function_exists($module."_admin_permissions"))
 		{
-			if(isset($mybb->admin['permissions'][$module]))
+			if(isset($mybb->admin['permissions'][$module]) || $is_super_admin == true)
 			{
 				$has_permission = true;
 			}

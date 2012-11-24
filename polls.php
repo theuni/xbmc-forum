@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: polls.php 5538 2011-08-08 09:46:13Z PirataNervo $
+ * $Id: polls.php 5826 2012-05-04 10:30:10Z Tomm $
  */
 
 define("IN_MYBB", 1);
@@ -322,16 +322,12 @@ if($mybb->input['action'] == "editpoll")
 	else
 	{
 		// Is our forum closed?
-		if ($forum['open'] == 0)
+		if($forum['open'] == 0)
 		{
 			// Doesn't look like it is
 			error($lang->error_closedinvalidforum);
 		}
 	}
-
-	$query = $db->simple_select("forums", "*", "fid='$fid'");
-	$forum = $db->fetch_array($query);
-
 
 	if(!$tid)
 	{
@@ -490,15 +486,12 @@ if($mybb->input['action'] == "do_editpoll" && $mybb->request_method == "post")
 	else
 	{
 		// Is our forum closed?
-		if ($forum['open'] == 0)
+		if($forum['open'] == 0)
 		{
 			// Doesn't look like it is
 			error($lang->error_closedinvalidforum);
 		}
 	}
-
-	$query = $db->simple_select("forums", "*", "fid='".$thread['fid']."'");
-	$forum = $db->fetch_array($query);
 
 	if($thread['visible'] == 0 || !$thread['tid'])
 	{
@@ -875,29 +868,37 @@ if($mybb->input['action'] == "vote" && $mybb->request_method == "post")
 	$numvotes = $poll['numvotes'];
 	if($poll['multiple'] == 1)
 	{
-		foreach($option as $voteoption => $vote)
+		if(is_array($option))
 		{
-			if($vote == 1 && isset($votesarray[$voteoption-1]))
+			foreach($option as $voteoption => $vote)
 			{
-				if($votesql)
+				if($vote == 1 && isset($votesarray[$voteoption-1]))
 				{
-					$votesql .= ",";
+					if($votesql)
+					{
+						$votesql .= ",";
+					}
+					$votesql .= "('".$poll['pid']."','".$mybb->user['uid']."','".$db->escape_string($voteoption)."','$now')";
+					$votesarray[$voteoption-1]++;
+					$numvotes = $numvotes+1;
 				}
-				$votesql .= "('".$poll['pid']."','".$mybb->user['uid']."','".$db->escape_string($voteoption)."','$now')";
-				$votesarray[$voteoption-1]++;
-				$numvotes = $numvotes+1;
 			}
 		}
 	}
 	else
 	{
-		if(!isset($votesarray[$option-1]))
+		if(is_array($option) || !isset($votesarray[$option-1]))
 		{
 			error($lang->error_nopolloptions);
 		}
 		$votesql = "('".$poll['pid']."','".$mybb->user['uid']."','".$db->escape_string($option)."','$now')";
 		$votesarray[$option-1]++;
 		$numvotes = $numvotes+1;
+	}
+
+	if(!$votesql)
+	{
+		error($lang->error_nopolloptions);
 	}
 
 	$db->write_query("
@@ -1061,5 +1062,4 @@ if($mybb->input['action'] == "do_undovote")
 
 	redirect(get_thread_link($poll['tid']), $lang->redirect_unvoted);
 }
-
 ?>

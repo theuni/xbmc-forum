@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: groups.php 5648 2011-11-09 08:48:00Z Tomm $
+ * $Id: groups.php 5771 2012-04-19 09:37:36Z Tomm $
  */
  
 // Array of usergroup permission fields and their default values.
@@ -34,6 +34,7 @@ $usergroup_permissions = array(
 	"pmquota" => 100,
 	"maxpmrecipients" => 5,
 	"cansendemail" => 1,
+	"cansendemailoverride" => 0,
 	"maxemails" => 4,
 	"canviewmemberlist" => 1,
 	"canviewcalendar" => 1,
@@ -294,17 +295,18 @@ if($mybb->input['action'] == "join_requests")
 		ORDER BY dateline ASC
 		LIMIT {$start}, {$per_page}
 	");
+
 	while($request = $db->fetch_array($query))
 	{
 		$table->construct_cell($form->generate_check_box("users[]", $request['uid'], ""));
 		$table->construct_cell("<strong>".build_profile_link($request['username'], $request['uid'], "_blank")."</strong>");
 		$table->construct_cell(htmlspecialchars_uni($request['reason']));
 		$table->construct_cell(my_date($mybb->settings['dateformat'].", ".$mybb->settings['timeformat'], $request['dateline']), array('class' => 'align_center'));
-		
+
 		$popup = new PopupMenu("join_{$request['rid']}", $lang->options);
 		$popup->add_item($lang->approve, "index.php?module=user-groups&action=approve_join_request&amp;rid={$request['rid']}&amp;my_post_key={$mybb->post_code}");
 		$popup->add_item($lang->deny, "index.php?module=user-groups&action=deny_join_request&amp;rid={$request['rid']}&amp;my_post_key={$mybb->post_code}");
-		
+
 		$table->construct_cell($popup->fetch(), array('class' => "align_center"));
 		$table->construct_row();	
 	}
@@ -756,6 +758,14 @@ if($mybb->input['action'] == "edit")
 		{
 			$errors[] = $lang->error_missing_namestyle_username;
 		}
+		else
+		{
+			if(preg_match("#<((m[^a])|(b[^diloru>])|(s[^aemptu>]))(\s*[^>]*)>#si", $mybb->input['namestyle']))
+			{
+				$errors[] = $lang->error_disallowed_namestyle_username;
+				$mybb->input['namestyle'] = $usergroup['namestyle'];
+			}
+		}
 
 		if(!$errors)
 		{
@@ -817,6 +827,7 @@ if($mybb->input['action'] == "edit")
 				"pmquota" => intval($mybb->input['pmquota']),
 				"maxpmrecipients" => intval($mybb->input['maxpmrecipients']),
 				"cansendemail" => intval($mybb->input['cansendemail']),
+				"cansendemailoverride" => intval($mybb->input['cansendemailoverride']),
 				"maxemails" => intval($mybb->input['maxemails']),		
 				"canviewmemberlist" => intval($mybb->input['canviewmemberlist']),
 				"canviewcalendar" => intval($mybb->input['canviewcalendar']),
@@ -1081,6 +1092,7 @@ if($mybb->input['action'] == "edit")
 		$form->generate_check_box("canviewmemberlist", 1, $lang->can_view_member_list, array("checked" => $mybb->input['canviewmemberlist'])),
 		$form->generate_check_box("showinbirthdaylist", 1, $lang->show_in_birthday_list, array("checked" => $mybb->input['showinbirthdaylist'])),
 		$form->generate_check_box("cansendemail", 1, $lang->can_email_users, array("checked" => $mybb->input['cansendemail'])),
+		$form->generate_check_box("cansendemailoverride", 1, $lang->can_email_users_override, array("checked" => $mybb->input['cansendemailoverride'])),
 		"{$lang->max_emails_per_day}<br /><small class=\"input\">{$lang->max_emails_per_day_desc}</small><br />".$form->generate_text_box('maxemails', $mybb->input['maxemails'], array('id' => 'maxemails', 'class' => 'field50'))
 	);
 	$form_container->output_row($lang->misc, "", "<div class=\"group_settings_bit\">".implode("</div><div class=\"group_settings_bit\">", $misc_options)."</div>");

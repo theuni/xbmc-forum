@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: search.php 5442 2011-04-16 09:09:38Z jammerx2 $
+ * $Id: search.php 5828 2012-05-08 16:06:16Z Tomm $
  */
 
 
@@ -184,7 +184,7 @@ if($mybb->input['action'] == "results")
 			ORDER BY pid, disporder
 		");
 		
-		$forumsread = unserialize($mybb->cookies['mybb']['forumread']);
+		$forumsread = my_unserialize($mybb->cookies['mybb']['forumread']);
 	}
 	else
 	{
@@ -197,6 +197,7 @@ if($mybb->input['action'] == "results")
 			ORDER BY pid, disporder
 		");
 	}
+
 	while($forum = $db->fetch_array($query))
 	{
 		if($mybb->user['uid'] == 0)
@@ -366,6 +367,11 @@ if($mybb->input['action'] == "results")
 			}
 		}
 
+		if(!$mybb->settings['maxmultipagelinks'])
+		{
+			$mybb->settings['maxmultipagelinks'] = 5;
+		}
+
 		foreach($thread_cache as $thread)
 		{
 			$bgcolor = alt_trow();
@@ -501,9 +507,9 @@ if($mybb->input['action'] == "results")
 			{
 				$thread['pages'] = $thread['posts'] / $mybb->settings['postsperpage'];
 				$thread['pages'] = ceil($thread['pages']);
-				if($thread['pages'] > 4)
+				if($thread['pages'] > $mybb->settings['maxmultipagelinks'])
 				{
-					$pagesstop = 4;
+					$pagesstop = $mybb->settings['maxmultipagelinks'] - 1;
 					$page_link = get_thread_link($thread['tid'], $thread['pages']).$highlight;
 					eval("\$morelink = \"".$templates->get("forumdisplay_thread_multipage_more")."\";");
 				}
@@ -816,7 +822,23 @@ if($mybb->input['action'] == "results")
 			$donenew = 0;
 			$last_read = 0;
 			$post['thread_lastread'] = $readthreads[$post['tid']];
-			if($mybb->settings['threadreadcut'] > 0 && $mybb->user['uid'] && $post['thread_lastpost'] > $forumread)
+
+			if($mybb->settings['threadreadcut'] > 0 && $mybb->user['uid'])
+			{
+				$forum_read = $readforums[$post['fid']];
+			
+				$read_cutoff = TIME_NOW-$mybb->settings['threadreadcut']*60*60*24;
+				if($forum_read == 0 || $forum_read < $read_cutoff)
+				{
+					$forum_read = $read_cutoff;
+				}
+			}
+			else
+			{
+				$forum_read = $forumsread[$post['fid']];
+			}
+
+			if($mybb->settings['threadreadcut'] > 0 && $mybb->user['uid'] && $post['thread_lastpost'] > $forum_read)
 			{
 				$cutoff = TIME_NOW-$mybb->settings['threadreadcut']*60*60*24;
 				if($post['thread_lastpost'] > $cutoff)
@@ -841,13 +863,13 @@ if($mybb->input['action'] == "results")
 			if(!$last_read)
 			{
 				$readcookie = $threadread = my_get_array_cookie("threadread", $post['tid']);
-				if($readcookie > $forumread)
+				if($readcookie > $forum_read)
 				{
 					$last_read = $readcookie;
 				}
-				elseif($forumread > $mybb->user['lastvisit'])
+				elseif($forum_read > $mybb->user['lastvisit'])
 				{
-					$last_read = $forumread;
+					$last_read = $forum_read;
 				}
 				else
 				{
@@ -1404,7 +1426,7 @@ elseif($mybb->input['action'] == "do_search" && $mybb->request_method == "post")
 	}
 
 	if($db->can_search == true)
-	{		
+	{
 		if($mybb->settings['searchtype'] == "fulltext" && $db->supports_fulltext_boolean("posts") && $db->is_fulltext("posts"))
 		{
 			$search_results = perform_search_mysql_ft($search_data);

@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: functions_modcp.php 5297 2010-12-28 22:01:14Z Tomm $
+ * $Id: functions_modcp.php 5813 2012-04-20 13:41:04Z Tomm $
  */
 
 /**
@@ -37,7 +37,7 @@ function modcp_can_manage_user($uid)
 
 function fetch_forum_announcements($pid=0, $depth=1)
 {
-	global $mybb, $db, $lang, $announcements, $templates, $announcements_forum, $moderated_forums;
+	global $mybb, $db, $lang, $theme, $announcements, $templates, $announcements_forum, $moderated_forums, $unviewableforums;
 	static $forums_by_parent, $forum_cache, $parent_forums;
 
 	if(!is_array($forum_cache))
@@ -70,6 +70,11 @@ function fetch_forum_announcements($pid=0, $depth=1)
 	{
 		foreach($children as $forum)
 		{
+			if($forum['linkto'] || ($unviewableforums && in_array($forum['fid'], $unviewableforums)))
+			{
+				continue;
+			}
+
 			if($forum['active'] == 0 || !is_moderator($forum['fid']))
 			{
 				// Check if this forum is a parent of a moderated forum
@@ -102,11 +107,11 @@ function fetch_forum_announcements($pid=0, $depth=1)
 						
 						if($announcement['enddate'] < TIME_NOW && $announcement['enddate'] != 0)
 						{
-							$icon = "<img src=\"images/minioff.gif\" alt=\"({$lang->expired})\" title=\"{$lang->expired_announcement}\"  style=\"vertical-align: middle;\" /> ";
+							$icon = "<img src=\"{$theme['imgdir']}/minioff.gif\" alt=\"({$lang->expired})\" title=\"{$lang->expired_announcement}\"  style=\"vertical-align: middle;\" /> ";
 						}
 						else
 						{
-							$icon = "<img src=\"images/minion.gif\" alt=\"({$lang->active})\" title=\"{$lang->active_announcement}\"  style=\"vertical-align: middle;\" /> ";
+							$icon = "<img src=\"{$theme['imgdir']}/minion.gif\" alt=\"({$lang->active})\" title=\"{$lang->active_announcement}\"  style=\"vertical-align: middle;\" /> ";
 						}
 						
 						$subject = htmlspecialchars_uni($announcement['subject']);

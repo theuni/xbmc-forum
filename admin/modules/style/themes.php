@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: themes.php 5390 2011-03-17 15:23:41Z Tomm $
+ * $Id: themes.php 5828 2012-05-08 16:06:16Z Tomm $
  */
 
 // Disallow direct access to this file for security reasons

@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: functions_indicators.php 5606 2011-09-19 13:38:50Z Tomm $
+ * $Id: functions_indicators.php 5831 2012-05-23 11:21:28Z Tomm $
  */
 
 /**
@@ -39,7 +39,7 @@ function mark_thread_read($tid, $fid)
 	// Default back to cookie marking
 	else
 	{
-		my_set_array_cookie("threadread", $tid, TIME_NOW);
+		my_set_array_cookie("threadread", $tid, TIME_NOW, -1);
 	}
 
 	$unread_count = fetch_unread_count($fid);
@@ -57,17 +57,26 @@ function mark_thread_read($tid, $fid)
  */
 function fetch_unread_count($fid)
 {
-	global $db, $mybb;
+	global $cache, $db, $mybb;
 
+	$onlyview = $onlyview2 = '';
+	$permissions = forum_permissions($fid);
 	$cutoff = TIME_NOW-$mybb->settings['threadreadcut']*60*60*24;
+
+	if($permissions['canonlyviewownthreads'])
+	{
+		$onlyview = " AND uid = '{$mybb->user['uid']}'";
+		$onlyview2 = " AND t.uid = '{$mybb->user['uid']}'";
+	}
 
 	if($mybb->user['uid'] == 0)
 	{
 		$comma = '';
 		$tids = '';
-		$threadsread = unserialize($mybb->cookies['mybb']['threadread']);
-		$forumsread = unserialize($mybb->cookies['mybb']['forumread']);
-		if(is_array($threadsread))
+		$threadsread = my_unserialize($mybb->cookies['mybb']['threadread']);
+		$forumsread = my_unserialize($mybb->cookies['mybb']['forumread']);
+
+		if(!empty($threadsread))
 		{
 			foreach($threadsread as $key => $value)
 			{
@@ -81,7 +90,7 @@ function fetch_unread_count($fid)
 			$count = 0;
 
 			// We've read at least some threads, are they here?
-			$query = $db->simple_select("threads", "lastpost, tid, fid", "visible=1 AND closed NOT LIKE 'moved|%' AND fid IN ($fid) AND lastpost > '{$cutoff}'", array("limit" => 100));
+			$query = $db->simple_select("threads", "lastpost, tid, fid", "visible=1 AND closed NOT LIKE 'moved|%' AND fid IN ($fid) AND lastpost > '{$cutoff}'{$onlyview}", array("limit" => 100));
 
 			while($thread = $db->fetch_array($query))
 			{
@@ -107,7 +116,7 @@ function fetch_unread_count($fid)
 					FROM ".TABLE_PREFIX."threads t
 					LEFT JOIN ".TABLE_PREFIX."threadsread tr ON (tr.tid=t.tid AND tr.uid='{$mybb->user['uid']}')
 					LEFT JOIN ".TABLE_PREFIX."forumsread fr ON (fr.fid=t.fid AND fr.uid='{$mybb->user['uid']}')
-					WHERE t.visible=1 AND t.closed NOT LIKE 'moved|%' AND t.fid IN ($fid) AND t.lastpost > COALESCE(tr.dateline,$cutoff) AND t.lastpost > COALESCE(fr.dateline,$cutoff) AND t.lastpost>$cutoff
+					WHERE t.visible=1 AND t.closed NOT LIKE 'moved|%' AND t.fid IN ($fid) AND t.lastpost > COALESCE(tr.dateline,$cutoff) AND t.lastpost > COALESCE(fr.dateline,$cutoff) AND t.lastpost>$cutoff{$onlyview2}
 				");
 				break;
 			default:
@@ -116,7 +125,7 @@ function fetch_unread_count($fid)
 					FROM ".TABLE_PREFIX."threads t
 					LEFT JOIN ".TABLE_PREFIX."threadsread tr ON (tr.tid=t.tid AND tr.uid='{$mybb->user['uid']}')
 					LEFT JOIN ".TABLE_PREFIX."forumsread fr ON (fr.fid=t.fid AND fr.uid='{$mybb->user['uid']}')
-					WHERE t.visible=1 AND t.closed NOT LIKE 'moved|%' AND t.fid IN ($fid) AND t.lastpost > IFNULL(tr.dateline,$cutoff) AND t.lastpost > IFNULL(fr.dateline,$cutoff) AND t.lastpost>$cutoff
+					WHERE t.visible=1 AND t.closed NOT LIKE 'moved|%' AND t.fid IN ($fid) AND t.lastpost > IFNULL(tr.dateline,$cutoff) AND t.lastpost > IFNULL(fr.dateline,$cutoff) AND t.lastpost>$cutoff{$onlyview2}
 				");
 		}
 		return $db->fetch_field($query, "unread_count");
@@ -206,7 +215,7 @@ function mark_forum_read($fid)
 	// Mark in a cookie
 	else
 	{
-		my_set_array_cookie("forumread", $fid, TIME_NOW);
+		my_set_array_cookie("forumread", $fid, TIME_NOW, -1);
 	}
 }
 

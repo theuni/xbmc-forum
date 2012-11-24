@@ -3,7 +3,7 @@
  * MyBB 1.6 English Language Pack
  * Copyright 2010 MyBB Group, All Rights Reserved
  * 
- * $Id: config_badwords.lang.php 5490 2011-07-12 13:39:55Z Tomm $
+ * $Id: config_badwords.lang.php 5783 2012-04-19 12:49:23Z Tomm $
  */
 
 $l['bad_words'] = "Word Filters";
@@ -26,6 +26,7 @@ $l['add_bad_word'] = "Add a Filter";
 
 $l['error_missing_bad_word'] = "You did not enter a word filter.";
 $l['error_invalid_bid'] = "The specified filter does not exist.";
+$l['error_bad_word_filtered'] = "The filter you entered already exists.";
 
 $l['success_added_bad_word'] = "The filter has been added successfully.";
 $l['success_deleted_bad_word'] = "The filter has been deleted successfully.";

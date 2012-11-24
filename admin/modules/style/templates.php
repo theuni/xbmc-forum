@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: templates.php 5390 2011-03-17 15:23:41Z Tomm $
+ * $Id: templates.php 5812 2012-04-20 11:48:27Z Tomm $
  */
 
 // Disallow direct access to this file for security reasons
@@ -660,7 +660,7 @@ if($mybb->input['action'] == "search_replace")
 						{
 							// Do replacement
 							$newtemplate = str_ireplace($mybb->input['find'], $mybb->input['replace'], $template['template']);
-							if($newtemplate != $template['template'])
+							if($newtemplate != $template['template'] && check_template($newtemplate) === false)
 							{
 								// If the template is different, that means the search term has been found.
 								if(trim($mybb->input['replace']) != "")

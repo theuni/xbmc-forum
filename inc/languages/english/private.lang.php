@@ -3,7 +3,7 @@
  * MyBB 1.6 English Language Pack
  * Copyright 2010 MyBB Group, All Rights Reserved
  *
- * $Id: private.lang.php 5608 2011-09-19 14:05:43Z Tomm $
+ * $Id: private.lang.php 5828 2012-05-08 16:06:16Z Tomm $
  */
 
 $l['nav_pms'] = "Private Messages";
@@ -94,6 +94,7 @@ $l['max_recipients'] = "<br />You may send this message to a maximum of <strong>
 $l['compose_subject'] = "Subject:";
 $l['compose_message'] = "Message:";
 $l['compose_options'] = "Options:";
+$l['message_icon'] = "Message Icon:";
 $l['options_sig'] = "<strong>Signature:</strong> include your signature in this message.";
 $l['options_disable_smilies'] = "<strong>Disable Smilies:</strong> disable smilies from showing in this message.";
 $l['options_save_copy'] = "<strong>Save a Copy:</strong> save a copy of this message in your Sent Items folder.";

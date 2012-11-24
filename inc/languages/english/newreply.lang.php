@@ -3,7 +3,7 @@
  * MyBB 1.6 English Language Pack
  * Copyright 2010 MyBB Group, All Rights Reserved
  * 
- * $Id: newreply.lang.php 5617 2011-09-20 13:50:05Z Tomm $
+ * $Id: newreply.lang.php 5657 2011-11-27 12:32:47Z Tomm $
  */
 
 $l['nav_newreply'] = "Post Reply";
@@ -22,6 +22,7 @@ $l['preview_post'] = "Preview Post";
 $l['mod_options'] ="Moderator Options:";
 $l['close_thread'] = "<strong>Close Thread</strong>: prevent further posting in this thread.";
 $l['stick_thread'] = "<strong>Stick Thread:</strong> stick this thread to the top of the forum.";
+$l['forum_rules'] = "{1} - Rules";
 $l['thread_review'] = "Thread Review (Newest First)";
 $l['thread_review_more'] = "This thread has more than {1} replies. <a href=\"{2}\">Read the whole thread.</a>";
 $l['posted_by'] = "Posted by";

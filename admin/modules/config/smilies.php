@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: smilies.php 5459 2011-05-10 10:47:56Z Tomm $
+ * $Id: smilies.php 5676 2011-11-29 12:10:19Z Tomm $
  */
 
 // Disallow direct access to this file for security reasons
@@ -666,7 +666,7 @@ if(!$mybb->input['action'])
 	
 	if($table->num_rows() == 0)
 	{
-		$table->construct_cell($lang->no_smilies, array('colspan' => 4));
+		$table->construct_cell($lang->no_smilies, array('colspan' => 5));
 		$table->construct_row();
 	}
 	

@@ -3,7 +3,7 @@
  * MyBB 1.6 English Language Pack
  * Copyright 2010 MyBB Group, All Rights Reserved
  *
- * $Id: global.lang.php 5601 2011-09-16 15:53:05Z Tomm $
+ * $Id: global.lang.php 5738 2011-12-30 14:26:42Z ralgith $
  */
 
 $l['redirect_width'] = "50%";
@@ -65,8 +65,12 @@ $l['wrong_forum_password'] = "The password you entered is incorrect. Please try 
 
 $l['reset_button'] = "Reset";
 $l['username'] = "Username:";
+$l['username1'] = "Email:";
+$l['username2'] = "Username/Email:";
 $l['password'] = "Password:";
 $l['login_username'] = "Username";
+$l['login_username1'] = "Email";
+$l['login_username2'] = "Username/Email";
 $l['login_password'] = "Password";
 $l['lost_password'] = "Lost Password?";
 $l['remember_me'] = "Remember me";
@@ -206,6 +210,7 @@ $l['postbit_ipaddress'] = "IP Address:";
 $l['postbit_ipaddress_logged'] = "Logged";
 $l['postbit_post'] = "Post:";
 $l['postbit_reputation'] = "Reputation:";
+$l['postbit_reputation_add'] = "Give Reputation to this user";
 $l['postbit_website'] = "Visit this user's website";
 $l['postbit_email'] = "Send this user an email";
 $l['postbit_find'] = "Find all posts by this user";

@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: portal.php 5297 2010-12-28 22:01:14Z Tomm $
+ * $Id: portal.php 5821 2012-05-02 15:40:38Z Tomm $
  */
 
 define("IN_MYBB", 1);
@@ -60,7 +60,21 @@ if($mybb->input['action'] == "do_login" && $mybb->request_method == "post")
 
 	if(!username_exists($mybb->input['username']))
 	{
-		error($lang->error_invalidpworusername.$login_text);
+		switch($mybb->settings['username_method'])
+		{
+			case 0:
+				error($lang->error_invalidpworusername.$login_text);
+				break;
+			case 1:
+				error($lang->error_invalidpworusername1.$login_text);
+				break;
+			case 2:
+				error($lang->error_invalidpworusername2.$login_text);
+				break;
+			default:
+				error($lang->error_invalidpworusername.$login_text);
+				break;
+		}
 	}
 	$user = validate_password_from_username($mybb->input['username'], $mybb->input['password']);
 	if(!$user['uid'])
@@ -181,6 +195,21 @@ if($mybb->settings['portal_showwelcome'] != 0)
 	{
 		$lang->guest_welcome_registration = $lang->sprintf($lang->guest_welcome_registration, $mybb->settings['bburl'] . '/member.php?action=register');
 		$mybb->user['username'] = $lang->guest;
+		switch($mybb->settings['username_method'])
+		{
+			case 0:
+				$username = $lang->username;
+				break;
+			case 1:
+				$username = $lang->username1;
+				break;
+			case 2:
+				$username = $lang->username2;
+				break;
+			default:
+				$username = $lang->username;
+				break;
+		}
 		eval("\$welcometext = \"".$templates->get("portal_welcome_guesttext")."\";");
 	}
 	$lang->welcome = $lang->sprintf($lang->welcome, $mybb->user['username']);
@@ -363,6 +392,14 @@ if($mybb->settings['portal_showdiscussions'] != 0 && $mybb->settings['portal_sho
 	);
 	while($thread = $db->fetch_array($query))
 	{
+		$forumpermissions[$thread['fid']] = forum_permissions($thread['fid']);
+
+		// Make sure we can view this thread
+		if($forumpermissions[$thread['fid']]['canview'] == 0 || $forumpermissions[$thread['fid']]['canviewthreads'] == 0 || $forumpermissions[$thread['fid']]['canonlyviewownthreads'] == 1 && $thread['uid'] != $mybb->user['uid'])
+		{
+			continue;
+		}
+
 		$lastpostdate = my_date($mybb->settings['dateformat'], $thread['lastpost']);
 		$lastposttime = my_date($mybb->settings['timeformat'], $thread['lastpost']);
 		// Don't link to guest's profiles (they have no profile).
@@ -403,10 +440,12 @@ if(is_array($announcementsfids))
 	$announcementsfids = implode(',', $fid_array);
 }
 // And get them!
-$query = $db->simple_select("forums", "*", "fid IN (".$announcementsfids.")");
-while($forumrow = $db->fetch_array($query))
+foreach($forum_cache as $fid => $f)
 {
-    $forum[$forumrow['fid']] = $forumrow;
+	if(is_array($fid_array) && in_array($fid, $fid_array))
+	{
+		$forum[$fid] = $f;
+	}
 }
 
 $numannouncements = intval($mybb->settings['portal_numannouncements']);
@@ -631,5 +670,4 @@ $plugins->run_hooks("portal_end");
 
 eval("\$portal = \"".$templates->get("portal")."\";");
 output_page($portal);
-
 ?>

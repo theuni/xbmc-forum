@@ -3,14 +3,14 @@
  * MyBB 1.6 English Language Pack
  * Copyright 2010 MyBB Group, All Rights Reserved
  * 
- * $Id: online.lang.php 5635 2011-10-11 08:45:33Z Tomm $
+ * $Id: online.lang.php 5788 2012-04-19 13:35:01Z Tomm $
  */
 
 $l['nav_online'] = "Who's Online";
 $l['nav_onlinetoday'] = "Who Was Online Today";
 
-$l['viewing_announcements'] = "Viewing <a href=\"{1}\">{2}</a> Announcements";
-$l['viewing_announcements2'] = "Viewing Forum Announcements";
+$l['viewing_announcements'] = "Viewing Announcement <a href=\"{1}\">{2}</a>";
+$l['viewing_announcements2'] = "Viewing Announcement";
 $l['viewing_attachment'] = "Viewing Attachment";
 $l['viewing_attachment2'] = "Viewing <a href=\"attachment.php?aid={1}\" target=\"_blank\">Attachment</a> in Thread <a href=\"{3}\">{2}</a>";
 $l['viewing_calendar'] = "Viewing <a href=\"calendar.php\">Calendar</a>";
@@ -75,6 +75,7 @@ $l['viewing_noperms'] = "Viewing No Permissions Page";
 $l['unknown_location'] = "<a href=\"{1}\">Unknown Location</a>";
 $l['giving_reputation'] = "Giving Reputation to <a href=\"{1}\">{2}</a>";
 $l['viewing_reputation_report'] = "Viewing <a href=\"{1}\">{2}'s Reputation</a>";
+$l['viewing_reputation_report2'] = "Viewing Reputation";
 $l['member_resendactivation'] = "Resending Account Activation Email";
 $l['member_lostpw'] = "Retrieving <a href=\"member.php?action=lostpw\">Lost Password</a>";
 $l['sending_thread'] = "Sending a thread to a friend";

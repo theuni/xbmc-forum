@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: usercp.php 5616 2011-09-20 13:24:59Z Tomm $
+ * $Id: usercp.php 5789 2012-04-19 13:50:38Z Tomm $
  */
 
 define("IN_MYBB", 1);
@@ -1256,9 +1256,17 @@ if($mybb->input['action'] == "subscriptions")
 	if(is_array($del_subscriptions))
 	{
 		$tids = implode(',', $del_subscriptions);
+
 		if($tids)
 		{
 			$db->delete_query("threadsubscriptions", "tid IN ({$tids}) AND uid='{$mybb->user['uid']}'");
+		}
+
+		$threadcount = $threadcount - count($del_subscriptions);
+
+		if($threadcount < 0)
+		{
+			$threadcount = 0;
 		}
 	}
 
@@ -1276,7 +1284,7 @@ if($mybb->input['action'] == "subscriptions")
 				ORDER BY pid, disporder
 			");
 			
-			$forumsread = unserialize($mybb->cookies['mybb']['forumread']);
+			$forumsread = my_unserialize($mybb->cookies['mybb']['forumread']);
 		}
 		else
 		{
@@ -1289,6 +1297,7 @@ if($mybb->input['action'] == "subscriptions")
 				ORDER BY pid, disporder
 			");
 		}
+
 		while($forum = $db->fetch_array($query))
 		{
 			if($mybb->user['uid'] == 0)
@@ -1495,14 +1504,10 @@ if($mybb->input['action'] == "subscriptions")
 	eval("\$subscriptions = \"".$templates->get("usercp_subscriptions")."\";");
 	output_page($subscriptions);
 }
+
 if($mybb->input['action'] == "forumsubscriptions")
 {
 	$plugins->run_hooks("usercp_forumsubscriptions_start");
-	$query = $db->simple_select("forumpermissions", "*", "gid='".$db->escape_string($mybb->user['usergroup'])."'");
-	while($permissions = $db->fetch_array($query))
-	{
-		$permissioncache[$permissions['gid']][$permissions['fid']] = $permissions;
-	}
 	
 	if($mybb->user['uid'] == 0)
 	{
@@ -1514,7 +1519,7 @@ if($mybb->input['action'] == "forumsubscriptions")
 			ORDER BY pid, disporder
 		");
 		
-		$forumsread = unserialize($mybb->cookies['mybb']['forumread']);
+		$forumsread = my_unserialize($mybb->cookies['mybb']['forumread']);
 	}
 	else
 	{
@@ -1527,6 +1532,7 @@ if($mybb->input['action'] == "forumsubscriptions")
 			ORDER BY pid, disporder
 		");
 	}
+
 	while($forum = $db->fetch_array($query))
 	{
 		if($mybb->user['uid'] == 0)
@@ -1538,10 +1544,10 @@ if($mybb->input['action'] == "forumsubscriptions")
 		}
 		$readforums[$forum['fid']] = $forum['lastread'];
 	}
-	
-	require_once MYBB_ROOT."inc/functions_forumlist.php";
-	
+
 	$fpermissions = forum_permissions();
+	require_once MYBB_ROOT."inc/functions_forumlist.php";
+
 	$query = $db->query("
 		SELECT fs.*, f.*, t.subject AS lastpostsubject, fr.dateline AS lastread
 		FROM ".TABLE_PREFIX."forumsubscriptions fs
@@ -1551,48 +1557,60 @@ if($mybb->input['action'] == "forumsubscriptions")
 		WHERE f.type='f' AND fs.uid='".$mybb->user['uid']."'
 		ORDER BY f.name ASC
 	");
+
 	$forums = '';
 	while($forum = $db->fetch_array($query))
 	{
 		$forum_url = get_forum_link($forum['fid']);
 		$forumpermissions = $fpermissions[$forum['fid']];
-		if($forumpermissions['canview'] != 0)
+
+		if($forumpermissions['canview'] == 0)
 		{
-			$lightbulb = get_forum_lightbulb(array('open' => $forum['open'], 'lastread' => $forum['lastread']), array('lastpost' => $forum['lastpost']));
-			$folder = $lightbulb['folder'];
-			if($forum['lastpost'] == 0 || $forum['lastposter'] == "")
-			{
-				$lastpost = "<div align=\"center\">$lang->never</div>";
-			}
-			else
-			{
-				$lastpost_date = my_date($mybb->settings['dateformat'], $forum['lastpost']);
-				$lastpost_time = my_date($mybb->settings['timeformat'], $forum['lastpost']);
-				$lastposttid = $forum['lastposttid'];
-				$lastposter = $forum['lastposter'];
-				$lastpost_profilelink = build_profile_link($lastposter, $forum['lastposteruid']);
-				$lastpost_subject = htmlspecialchars_uni($forum['lastpostsubject']);
-				if(my_strlen($lastpost_subject) > 25)
-				{
-					$lastpost_subject = my_substr($lastpost_subject, 0, 25) . "...";
-				}
-				$lastpost_link = get_thread_link($forum['lastposttid'], 0, "lastpost");
-				eval("\$lastpost = \"".$templates->get("forumbit_depth2_forum_lastpost")."\";");
-			}
+			continue;
 		}
+
+		$lightbulb = get_forum_lightbulb(array('open' => $forum['open'], 'lastread' => $forum['lastread']), array('lastpost' => $forum['lastpost']));
+		$folder = $lightbulb['folder'];
+
+		if($forum['lastpost'] == 0 || $forum['lastposter'] == "")
+		{
+			$lastpost = "<div align=\"center\">$lang->never</div>";
+		}
+		else
+		{
+			$forum['lastpostsubject'] = $parser->parse_badwords($forum['lastpostsubject']);
+			$lastpost_date = my_date($mybb->settings['dateformat'], $forum['lastpost']);
+			$lastpost_time = my_date($mybb->settings['timeformat'], $forum['lastpost']);
+			$lastposttid = $forum['lastposttid'];
+			$lastposter = $forum['lastposter'];
+			$lastpost_profilelink = build_profile_link($lastposter, $forum['lastposteruid']);
+			$lastpost_subject = htmlspecialchars_uni($forum['lastpostsubject']);
+			if(my_strlen($lastpost_subject) > 25)
+			{
+				$lastpost_subject = my_substr($lastpost_subject, 0, 25) . "...";
+			}
+			$lastpost_link = get_thread_link($forum['lastposttid'], 0, "lastpost");
+			eval("\$lastpost = \"".$templates->get("forumbit_depth2_forum_lastpost")."\";");
+		}
+
 		$posts = my_number_format($forum['posts']);
 		$threads = my_number_format($forum['threads']);
+
 		if($mybb->settings['showdescriptions'] == 0)
 		{
 			$forum['description'] = "";
 		}
+
 		eval("\$forums .= \"".$templates->get("usercp_forumsubscriptions_forum")."\";");
 	}
+
 	if(!$forums)
 	{
 		eval("\$forums = \"".$templates->get("usercp_forumsubscriptions_none")."\";");
 	}
+
 	$plugins->run_hooks("usercp_forumsubscriptions_end");
+
 	eval("\$forumsubscriptions = \"".$templates->get("usercp_forumsubscriptions")."\";");
 	output_page($forumsubscriptions);
 }
@@ -1678,6 +1696,7 @@ if($mybb->input['action'] == "editsig")
 			"allow_smilies" => $mybb->settings['sigsmilies'],
 			"allow_imgcode" => $mybb->settings['sigimgcode'],
 			"me_username" => $mybb->user['username'],
+			"filter_badwords" => 1
 		);
 
 		$sigpreview = $parser->parse_message($sig, $sig_parser);
@@ -2934,6 +2953,12 @@ if($mybb->input['action'] == "do_notepad" && $mybb->request_method == "post")
 {
 	// Verify incoming POST request
 	verify_post_check($mybb->input['my_post_key']);
+
+	// Cap at 60,000 chars; text will allow up to 65535?
+	if(my_strlen($mybb->input['notepad']) > 60000)
+	{
+		$mybb->input['notepad'] = my_substr($mybb->input['notepad'], 0, 60000);
+	}
 
 	$plugins->run_hooks("usercp_do_notepad_start");
 	$db->update_query("users", array('notepad' => $db->escape_string($mybb->input['notepad'])), "uid='".$mybb->user['uid']."'");

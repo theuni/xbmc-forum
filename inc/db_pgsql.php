@@ -6,7 +6,7 @@
  * Website: http://www.mybboard.com
  * License: http://www.mybboard.com/license.php
  *
- * $Id: db_pgsql.php 5332 2011-01-14 12:07:07Z Tomm $
+ * $Id: db_pgsql.php 5828 2012-05-08 16:06:16Z Tomm $
  */
 
 class DB_PgSQL

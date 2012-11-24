@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: private.php 5476 2011-06-24 14:49:59Z Tomm $
+ * $Id: private.php 5780 2012-04-19 11:46:06Z Tomm $
  */
 
 define("IN_MYBB", 1);
@@ -485,9 +485,6 @@ if($mybb->input['action'] == "results")
 			$message['message'] = my_substr($message['message'], 0, 200)."...";
 		}
 		
-		// For my sanity...
-		$message['message'] = htmlspecialchars_uni($message['message']);
-		
 		eval("\$messagelist .= \"".$templates->get("private_search_messagebit")."\";");
 	}
 	
@@ -643,6 +640,8 @@ if($mybb->input['action'] == "send")
 			$smilieinserter = build_clickable_smilies();
 		}
 	}
+
+	$lang->post_icon = $lang->message_icon;
 
 	$posticons = get_post_icons();
 	$previewmessage = $mybb->input['message'];
@@ -1241,7 +1240,7 @@ if($mybb->input['action'] == "do_tracking" && $mybb->request_method == "post")
 			}
 		}
 		$plugins->run_hooks("private_do_tracking_end");
-		redirect("private.php", $lang->redirect_pmstrackingstopped);
+		redirect("private.php?action=tracking", $lang->redirect_pmstrackingstopped);
 	}
 	elseif($mybb->input['stoptrackingunread'])
 	{
@@ -1256,7 +1255,7 @@ if($mybb->input['action'] == "do_tracking" && $mybb->request_method == "post")
 			}
 		}
 		$plugins->run_hooks("private_do_tracking_end");
-		redirect("private.php", $lang->redirect_pmstrackingstopped);
+		redirect("private.php?action=tracking", $lang->redirect_pmstrackingstopped);
 	}
 	elseif($mybb->input['cancel'])
 	{
@@ -1282,7 +1281,7 @@ if($mybb->input['action'] == "do_tracking" && $mybb->request_method == "post")
 			}
 		}
 		$plugins->run_hooks("private_do_tracking_end");
-		redirect("private.php", $lang->redirect_pmstrackingcanceled);
+		redirect("private.php?action=tracking", $lang->redirect_pmstrackingcanceled);
 	}
 }
 

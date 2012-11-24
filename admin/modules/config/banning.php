@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: banning.php 5557 2011-08-26 14:06:44Z huji $
+ * $Id: banning.php 5795 2012-04-19 14:34:52Z Tomm $
  */
 
 // Disallow direct access to this file for security reasons
@@ -26,6 +26,12 @@ if($mybb->input['action'] == "add" && $mybb->request_method == "post")
 	if(!trim($mybb->input['filter']))
 	{
 		$errors[] = $lang->error_missing_ban_input;
+	}
+
+	$query = $db->simple_select("banfilters", "fid", "filter = '".$db->escape_string($mybb->input['filter'])."' AND type = '".intval($mybb->input['type'])."'");
+	if($db->num_rows($query))
+	{
+		$errors[] = $lang->error_filter_already_banned;
 	}
 
 	if(!$errors)
@@ -194,6 +200,11 @@ if(!$mybb->input['action'])
 
 	$page->output_nav_tabs($sub_tabs, $mybb->input['type']);
 
+	if($errors)
+	{
+		$page->output_inline_error($errors);
+	}
+
 	$table = new Table;
 	if($mybb->input['type'] == "usernames")
 	{
@@ -254,10 +265,6 @@ if(!$mybb->input['action'])
 	$table->output($title);
 
 	$form = new Form("index.php?module=config-banning&amp;action=add", "post", "add");
-	if($errors)
-	{
-		$page->output_inline_error($errors);
-	}
 	
 	if($mybb->input['type'] == "usernames")
 	{

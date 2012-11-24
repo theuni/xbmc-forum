@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: attachments.php 5453 2011-04-21 23:58:33Z jammerx2 $
+ * $Id: attachments.php 5765 2012-03-27 09:52:45Z Tomm $
  */
 
 // Disallow direct access to this file for security reasons
@@ -365,6 +365,8 @@ if($mybb->input['action'] == "orphans")
 			$query = $db->simple_select("attachments", "*", "aid IN (".implode(",", $aids).")");
 			while($attachment = $db->fetch_array($query))
 			{
+				$attachment['filename'] = htmlspecialchars_uni($attachment['filename']);
+
 				if($missing_attachment_files[$attachment['aid']])
 				{
 					$reason = $lang->reason_file_missing;
@@ -714,11 +716,11 @@ if(!$mybb->input['action'])
 		// Now we fetch the results if there were 100% no errors
 		if(!$errors)
 		{
+			$mybb->input['perpage'] = intval($mybb->input['perpage']);
 			if(!$mybb->input['perpage'])
 			{
 				$mybb->input['perpage'] = 20;
 			}
-			$mybb->input['perpage'] = intval($mybb->input['perpage']);
 
 			$mybb->input['page'] = intval($mybb->input['page']);
 			if($mybb->input['page'])
@@ -875,7 +877,7 @@ if(!$mybb->input['action'])
 function build_attachment_row($attachment, &$table, $use_form=false)
 {
 	global $mybb, $form;
-	$attachment['filename'] = htmlspecialchars($attachment['filename']);
+	$attachment['filename'] = htmlspecialchars_uni($attachment['filename']);
 
 	// Here we do a bit of detection, we want to automatically check for removal any missing attachments and any not assigned to a post uploaded > 24hours ago
 	// Check if the attachment exists in the file system

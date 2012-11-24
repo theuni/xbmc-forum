@@ -6,7 +6,7 @@
  * Website: http://mybb.com
  * License: http://mybb.com/about/license
  *
- * $Id: class_moderation.php 5623 2011-10-01 02:46:09Z ralgith $
+ * $Id: class_moderation.php 5828 2012-05-08 16:06:16Z Tomm $
  */
 
 class Moderation
@@ -2131,7 +2131,7 @@ class Moderation
 		$tids = array_map('intval', $tids);
 		$tids_csv = implode(',', $tids);
 		
-		$update_thread = array('prefix' => $prefix);
+		$update_thread = array('prefix' => intval($prefix));
 		$db->update_query('threads', $update_thread, "tid IN ({$tids_csv})");
 		
 		$arguments = array('tids' => $tids, 'prefix' => $prefix);
