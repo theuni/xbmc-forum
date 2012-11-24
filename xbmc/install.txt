@@ -1,4 +1,7 @@
-1: symlink all files in "plugins" folder in "inc/plugins/" and activate them
-2: symlink the images folder as "images/xbmc/"
-3: modify line 128 of inc/functions_rebuild.php and replace "pid!=" with "pid !=" (add space, should fix stats)
-4: add custom myBB-setting for "signatureuploadpath", define and create the folder (chmod 777) 
+1: copy "xbmc" folder to your forum root
+2: symlink or copy all files in "plugins" folder in "inc/plugins/" and activate them
+3: symlink or copy the images folder as "images/xbmc/"
+4: symlink or copy language files in "languages" to "inc/languages/"
+5: modify line 128 of inc/functions_rebuild.php and replace "pid!=" with "pid !=" (add space, should fix stats)
+6: add custom myBB-setting for "signatureuploadpath", define and create the folder (chmod 775, or whatever is needed for server write access)
+7: import theme

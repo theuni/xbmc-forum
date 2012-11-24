@@ -6,9 +6,8 @@
  * Author: da-anda
  */
 
-class xbmc_templates extends templates
-{
-	
+class xbmc_templates extends templates {
+
 	/**
 	 * @var string
 	 */
@@ -123,80 +122,91 @@ class xbmc_templates extends templates
 						}
 					}
 					$stylesheets = implode('', $newStylesheets);
-
 				}
-			}
-	
-			# check if the DB needs a update due to changed template files on file level
-			# we do this, because templates on file level are easier to edit, especially using a IDE.
-			# So if there are changed files, update the DB
-			if ($this->templateSetId && $this->templateSetId == $theme['templateset']) {
-
-					$templateDir = MYBB_ROOT . 'xbmc/templates/';
-					$templateSettings = (array) unserialize($cache->read('xbmc_template'));
-
-					if (@is_dir($templateDir) && ($this->alwaysUpdateCache || (filemtime($templateDir) > $templateSettings['lastUpdated']))) {
-						$query = $db->simple_select('templates', '*', 'sid=' . $this->templateSetId);
-						$templateFromDatabase = array();
-						while($row = $db->fetch_array($query)) {
-							$templateFromDatabase[$row['title']] = $row;
-						}
-						$db->free_result($query);
-			
-						$handle = opendir($templateDir);
-						while (($file = readdir($handle)) !== FALSE) {
-							if (!is_file($templateDir . $file)) { continue; }
-			
-							$fileInfo = pathinfo($file);
-							$fileMtime = filemtime($templateDir . $file);
-							if ($fileInfo['extension'] == 'html' && $fileMtime > $templateCache['lastUpdated']) {
-								$template = file_get_contents($templateDir . $file);
-			
-								$templateData = array(
-									'title' => $fileInfo['filename'],
-									'template' => $db->escape_string($template),
-									'dateline' => $fileMtime,
-									'sid' => $this->templateSetId
-								);
-
-								if (isset($templateFromDatabase[$fileInfo['filename']])) {
-									$db->update_query('templates', $templateData, 'tid=' . $templateFromDatabase[$fileInfo['filename']]['tid']);
-								} else {
-									$db->insert_query('templates', $templateData);
-								}
-			
-								$this->cache[$fileInfo['filename']] = $template;
-							}
-						}
-						
-						$templateSettings['lastUpdated'] = time();
-						$cache->update('xbmc_template', serialize($templateSettings));
-					}
-			
-			/*
-					# cleans up all unchanged templates in file level
-					# use this bevore you export your templates
-					
-					$allTemplates = $db->simple_select("templates", "title,template", "sid IN ('-2','-1','".$theme['templateset']."')");
-			
-					while ($template = $db->fetch_array($allTemplates)) {
-						$templateFile = '/var/www/mybb/xbmc/templates/' . $template['title'] . '.html';
-						if (@file_exists($templateFile)) {
-							$data = file_get_contents($templateFile);
-			
-							if (trim($data) == trim($template['template'])) {
-								print_r($templateFile);
-								unlink($templateFile);
-							}
-						}
-					}
-			*/
 			}
 		}
 	}
 
 	/**
-	 * Fetch a template directly from the install/resources/mybb_theme.xml directory if it exists (DEVELOPMENT MODE)
+	 * Updates the DB version of templates. This is useful to import your external HTML files
+	 * from development back to the myBB database and then export them as regular myBB theme.xml
+	 *
+	 * @return void
+	 */
+	public function updateTemplatesInDatabase() {
+		global $db, $theme, $mybb, $cache;
+
+		# check if the DB needs an update due to changed template files on file level
+		# we do this, because templates on file level are easier to edit, especially using a IDE.
+		# So if there are changed files, update the DB
+		if ($this->templateSetId && $this->templateSetId == $theme['templateset']) {
+
+				$templateDir = MYBB_ROOT . 'xbmc/templates/';
+				$templateSettings = (array) unserialize($cache->read('xbmc_template'));
+
+				if (@is_dir($templateDir) && ($this->alwaysUpdateCache || (filemtime($templateDir) > $templateSettings['lastUpdated']))) {
+					$query = $db->simple_select('templates', '*', 'sid=' . $this->templateSetId);
+					$templateFromDatabase = array();
+					while($row = $db->fetch_array($query)) {
+						$templateFromDatabase[$row['title']] = $row;
+					}
+					$db->free_result($query);
+		
+					$handle = opendir($templateDir);
+					while (($file = readdir($handle)) !== FALSE) {
+						if (!is_file($templateDir . $file)) { continue; }
+		
+						$fileInfo = pathinfo($file);
+						$fileMtime = filemtime($templateDir . $file);
+						if ($fileInfo['extension'] == 'html' && $fileMtime > $templateCache['lastUpdated']) {
+							$template = file_get_contents($templateDir . $file);
+		
+							$templateData = array(
+								'title' => $fileInfo['filename'],
+								'template' => $db->escape_string($template),
+								'dateline' => $fileMtime,
+								'sid' => $this->templateSetId
+							);
+
+							if (isset($templateFromDatabase[$fileInfo['filename']])) {
+								$db->update_query('templates', $templateData, 'tid=' . $templateFromDatabase[$fileInfo['filename']]['tid']);
+							} else {
+								$db->insert_query('templates', $templateData);
+							}
+		
+							$this->cache[$fileInfo['filename']] = $template;
+						}
+					}
+					
+					$templateSettings['lastUpdated'] = time();
+					$cache->update('xbmc_template', serialize($templateSettings));
+				}
+		
+		/*
+				# cleans up all unchanged templates in file level
+				# use this before you export your templates
+				
+				$allTemplates = $db->simple_select("templates", "title,template", "sid IN ('-2','-1','".$theme['templateset']."')");
+		
+				while ($template = $db->fetch_array($allTemplates)) {
+					$templateFile = $templateDir . $template['title'] . '.html';
+					if (@file_exists($templateFile)) {
+						$data = file_get_contents($templateFile);
+		
+						if (trim($data) == trim($template['template'])) {
+							print_r($templateFile);
+							unlink($templateFile);
+						}
+					}
+				}
+		*/
+		}	
+	}
+
+	/**
+	 * Fetch a template directly from the install/resources/mybb_theme.xml file if it exists (DEVELOPMENT MODE).
+	 * This is usefull while developing a new theme as it will write physical HTML files for each myBB template
+	 * and those HTML files can then be adjusted easily using an IDE instead within the forums admin section
 	 */
 	public function dev_get($title)
 	{
