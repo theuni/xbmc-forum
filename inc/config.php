@@ -5,6 +5,8 @@
  * Thus include 'em from an external file but
  * keep the dummy config.php for myBB
  */
-require_once('../../private/configuration.php');
+$private_path = '/etc/xbmc/php-include';
+set_include_path(get_include_path().PATH_SEPARATOR.$private_path);
+require_once('forum/private/configuration.php');
  
 ?>
