@@ -1174,7 +1174,7 @@
 </fieldset>]]></template>
 		<template name="postbit_email" version="0"><![CDATA[<a href="member.php?action=emailuser&amp;uid={$post['uid']}" class="button button-small link-email" title="{$lang->postbit_email_title}"><span class="icon"></span>{$lang->postbit_email}</a>]]></template>
 		<template name="postbit_iplogged_hiden" version="1606"><![CDATA[<span class="ipAddress">{$lang->postbit_ipaddress} <a href="moderation.php?action=getip&amp;pid={$post['pid']}">{$lang->postbit_ipaddress_logged}</a></span>]]></template>
-		<template name="forumbit_depth1_cat" version="0"><![CDATA[<div class="caption">
+		<template name="forumbit_depth1_cat" version="1608"><![CDATA[<div class="caption">
 	<span class="expcolimage"><img src="{$theme['imgdir']}/{$expcolimage}" id="cat_{$forum['fid']}_img" class="expander" alt="{$expaltext}" title="{$expaltext}" /></span>
 	<h2><a href="{$forum_url}">{$forum['name']}</a></h2>
 </div>
@@ -1193,7 +1193,6 @@
 	<tbody>
 		{$sub_forums}
 	</tbody>
-</tbody>
 </table>]]></template>
 		<template name="postbit_quickdelete" version="0"><![CDATA[<a href="editpost.php?pid={$post['pid']}" onclick="Thread.deletePost({$post['pid']}); return false;" id="quick_delete_{$post['pid']}" class="button button-small link-quickDelete noJShide" title="{$lang->postbit_qdelete_title}"><span class="icon"></span>{$lang->postbit_qdelete}</a>]]></template>
 		<template name="forumdisplay_newthread" version="0"><![CDATA[<a href="newthread.php?fid={$fid}" class="button link-postThread"><span class="icon"></span>{$lang->post_thread}</a>]]></template>
