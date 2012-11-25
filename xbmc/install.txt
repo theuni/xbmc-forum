@@ -1,3 +1,6 @@
+Installation instructions for a plain install:
+-------------------------------------------------------
+
 1: copy "xbmc" folder to your forum root
 2: symlink or copy all files in "plugins" folder in "inc/plugins/" and activate them
 3: symlink or copy the images folder as "images/xbmc/"
